@@ -12,6 +12,7 @@ import com.sprint.mission.discodeit.service.jcf.JCFMessageService;
 import com.sprint.mission.discodeit.service.jcf.JCFUserService;
 
 import java.util.List;
+import java.util.UUID;
 
 public class JavaApplication {
 
@@ -20,7 +21,7 @@ public class JavaApplication {
 
         UserService userService = new JCFUserService();
         ChannelService channelService = new JCFChannelService();
-        MessageService messageService = new JCFMessageService();
+        MessageService messageService = new JCFMessageService(userService, channelService); // 의존성 주입
 
         System.out.println("========== 유저  테스트 ==========");
         User user1 = new User("이경신", "경신", "안녕하세요.", "dosly2@nave.com", "profile.png");
@@ -61,7 +62,7 @@ public class JavaApplication {
         System.out.println("채널 전체 조회: \n" + channelService.findAll());
 
         System.out.println("---------- 채널 수정 ----------");
-        channelService.update(channel1.getId(), ChannelType.PRIVATE, "코드잇_SB_11기", List.of(user1.getId()));
+        channelService.update(channel1.getId(), ChannelType.PUBLIC, "코드잇_SB_11기 단체 채널", List.of(user2.getId()));
 
         System.out.println("---------- 채널 삭제 ----------");
         channelService.delete(channel2.getId());
@@ -89,5 +90,25 @@ public class JavaApplication {
         System.out.println("---------- 메시지 삭제 ----------");
         messageService.delete(message2.getId());
         messageService.delete(message2.getId());
+
+        System.out.println("\n========== 심화 검증 테스트 ==========");
+        User user3 = new User("주강사", "강사", "SB 코스 강사입니다.", "wnrkdtk@naver.com", "hello.png");
+        userService.create(user3);
+
+        Channel privateChannel = new Channel(ChannelType.PRIVATE, "비밀 채팅방", List.of());
+        channelService.create(privateChannel);
+
+        System.out.print("등록된 유저가 아닐 시 -> ");
+        Message testMessage1 = new Message("이곳은 비밀 채널입니다.", UUID.randomUUID(), privateChannel.getId());
+        messageService.create(testMessage1);
+
+
+        System.out.print("존재하는 채널이 아닐 시 -> ");
+        Message testMessage2 = new Message("이곳은 비밀 채널입니다.", user3.getId(), UUID.randomUUID());
+        messageService.create(testMessage2);
+
+        System.out.print("채널 멤버가 아닐 시 -> ");
+        Message testMessage3 = new Message("이곳은 비밀 채널입니다.", user3.getId(), privateChannel.getId());
+        messageService.create(testMessage3);
     }
 }
