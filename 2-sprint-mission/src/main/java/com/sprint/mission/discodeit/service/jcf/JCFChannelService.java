@@ -53,7 +53,7 @@ public class JCFChannelService implements ChannelService {
     public void delete(UUID id) {
         Channel removedChannel = data.remove(id);
         if (removedChannel != null) {
-            System.out.println(id + " 채널이 정상적으로 삭제되었습니다.");
+            System.out.println("채널이 정상적으로 삭제되었습니다.");
         } else {
             System.out.println("해당 채널을 찾을 수 없습니다.");
         }

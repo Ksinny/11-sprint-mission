@@ -49,7 +49,7 @@ public class User extends BaseEntity {
 
     @Override
     public String toString() {
-        return "User [" +
+        return "사용자 [" +
                 "UUID: " + getId() +
                 "\n이름: " + getUserName() +
                 ", 별명: " + getNickname() +
@@ -58,7 +58,7 @@ public class User extends BaseEntity {
                 ", 프로필 사진: " + getProfileImage() +
                 ", 생성 시간: " + getCreatedAt() +
                 ", 수정 시간: " + getUpdatedAt() +
-                ']';
+                "]\n" ;
     }
 
 }

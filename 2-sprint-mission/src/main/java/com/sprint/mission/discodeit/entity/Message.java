@@ -41,6 +41,6 @@ public class Message extends BaseEntity {
                 ", 내용: " + getContent() +
                 ", 작성 시간: " + getCreatedAt() +
                 ", 수정 시간: " + getUpdatedAt() +
-                ']';
+                "]\n";
     }
 }

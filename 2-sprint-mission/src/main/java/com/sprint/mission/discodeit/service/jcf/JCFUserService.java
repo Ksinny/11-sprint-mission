@@ -23,7 +23,7 @@ public class JCFUserService implements UserService {
             return;
         }
         data.put(user.getId(), user);
-        System.out.println(user.getUserName() + "유저가 생성되었습니다: ");
+        System.out.println(user.getUserName() + " 유저가 생성되었습니다.");
     }
 
     @Override
@@ -41,7 +41,7 @@ public class JCFUserService implements UserService {
         User user = data.get(id);
         if (user != null) {
             user.update(userName, nickname, description, email, profileImage);
-            System.out.println(userName + "유저 정보가 수정되었습니다." );
+            System.out.println(userName + " 유저 정보가 수정되었습니다.");
         } else {
             System.out.println("해당 유저를 찾을 수 없습니다.");
         }
@@ -51,7 +51,7 @@ public class JCFUserService implements UserService {
     public void delete(UUID id) {
         User removedUser = data.remove(id);
         if (removedUser != null) {
-            System.out.println(id + "유저가 정상적으로 삭제되었습니다.");
+            System.out.println("유저가 정상적으로 삭제되었습니다.");
         } else {
             System.out.println("해당 유저를 찾을 수 없습니다.");
         }

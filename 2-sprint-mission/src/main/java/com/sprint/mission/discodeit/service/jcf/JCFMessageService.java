@@ -19,7 +19,7 @@ public class JCFMessageService implements MessageService {
     public void create(Message message) {
         // 중복 생성 방지
         if (data.containsKey(message.getId())) {
-            System.out.println("이미 존재하는 메시지 ID입니다.");
+            System.out.println("이미 존재하는 메시지입니다.");
             return;
         }
         data.put(message.getId(), message);
@@ -41,7 +41,7 @@ public class JCFMessageService implements MessageService {
         Message message = data.get(id);
         if (message != null) {
             message.update(content);
-            System.out.println("메시지 내용이 수정되었습니다.");
+            System.out.println(content + "로 메시지가 수정되었습니다.");
         } else {
             System.out.println("해당 메시지를 찾을 수 없습니다.");
         }
@@ -51,7 +51,7 @@ public class JCFMessageService implements MessageService {
     public void delete(UUID id) {
         Message removedMessage = data.remove(id);
         if (removedMessage != null) {
-            System.out.println(id + " 메시지가 정상적으로 삭제되었습니다.");
+            System.out.println("메시지가 정상적으로 삭제되었습니다.");
         } else {
             System.out.println("해당 메시지를 찾을 수 없습니다.");
         }

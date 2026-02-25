@@ -43,7 +43,7 @@ public class Channel extends BaseEntity {
                 ", 참여 인원: " + (getMemberIds() != null ? getMemberIds().size() : 0) + "명" +
                 ", 생성 시간: " + getCreatedAt() +
                 ", 수정 시간: " + getUpdatedAt() +
-                ']';
+                "]\n";
     }
 
 
