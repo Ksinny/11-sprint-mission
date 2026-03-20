@@ -8,57 +8,61 @@ import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
 
 import java.io.*;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class FileMessageService implements MessageService {
-    private static final String FILE_PATH = "messages.ser";
-    private final Map<UUID, Message> data;
+    private final Path DIRECTORY;
+    private final String EXTENSION = ".ser";
+
     private final UserService userService;
     private final ChannelService channelService;
 
-    // 의존성 주입
     public FileMessageService(UserService userService, ChannelService channelService) {
-        this.data = load();
+        this.DIRECTORY = Paths.get(System.getProperty("user.dir"), "file-data-map", Message.class.getSimpleName());
+        if (Files.notExists(DIRECTORY)) {
+            try {
+                Files.createDirectories(DIRECTORY);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to create directory: " + DIRECTORY, e);
+            }
+        }
+
         this.userService = userService;
         this.channelService = channelService;
     }
 
-    // 직렬화
-    private void save() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_PATH))) {
-            oos.writeObject(data);
-            System.out.println("파일 저장 완료: " + FILE_PATH);
+    private Path resolvePath(UUID id) {
+        return DIRECTORY.resolve(id + EXTENSION);
+    }
+
+    private void saveToFile(Message message) {
+        Path path = resolvePath(message.getId());
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path.toFile()))) {
+            oos.writeObject(message);
         } catch (IOException e) {
-            System.out.println("파일 저장 실패" + e.getMessage());
-            e.printStackTrace();
+            throw new RuntimeException("Failed to save file: " + path, e);
         }
     }
 
-    // 역직렬화
-    @SuppressWarnings("unchecked") // 타입캐스팅 경고 무시
-    private Map<UUID, Message> load() {
-        File file = new File(FILE_PATH);
-
-        // 파일 검증
-        if (!file.exists()) {
-            return new HashMap<>();
-        }
-
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
-            return (Map<UUID, Message>) ois.readObject();
+    private Message loadFromFile(Path path) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path.toFile()))) {
+            return (Message) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            System.out.println("파일 불러오기 실패");
-            e.printStackTrace();
-            return new HashMap<>();
+            throw new RuntimeException("Failed to read file: " + path, e);
         }
     }
 
     @Override
     public Message create(String content, UUID authorId, UUID channelId) {
-        userService.findById(authorId); // 유저 검증
-        Channel channel = channelService.findById(channelId); // 채널 검증
+        userService.findById(authorId);
+        Channel channel = channelService.findById(channelId);
 
-        // 채널 접근 권한 검증
         if (channel.getType() == ChannelType.PRIVATE || channel.getType() == ChannelType.DM) {
             if (channel.getMemberIds() == null || !channel.getMemberIds().contains(authorId)) {
                 throw new IllegalArgumentException("User " + authorId + " is not a member of channel " + channelId);
@@ -66,34 +70,48 @@ public class FileMessageService implements MessageService {
         }
 
         Message message = new Message(content, authorId, channelId);
-        data.put(message.getId(), message);
-        save();
+        saveToFile(message);
         return message;
     }
 
     @Override
     public Message findById(UUID id) {
-        return Optional.ofNullable(data.get(id))
-                .orElseThrow(() -> new NoSuchElementException("Message with id " + id + " not found"));
+        Path path = resolvePath(id);
+        if (Files.notExists(path)) {
+            throw new NoSuchElementException("Message with id " + id + " not found");
+        }
+        return loadFromFile(path);
     }
 
     @Override
     public List<Message> findAll() {
-        return new ArrayList<>(data.values());
+        try (var pathStream = Files.list(DIRECTORY)) {
+            return pathStream
+                    .filter(path -> path.toString().endsWith(EXTENSION))
+                    .map(this::loadFromFile)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read directory: " + DIRECTORY, e);
+        }
     }
 
     @Override
     public Message update(UUID id, String content) {
         Message message = findById(id);
         message.update(content);
-        save();
+        saveToFile(message);
         return message;
     }
 
     @Override
     public void delete(UUID id) {
         findById(id);
-        data.remove(id);
-        save();
+        Path path = resolvePath(id);
+
+        try {
+            Files.delete(path);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete file: " + path, e);
+        }
     }
 }

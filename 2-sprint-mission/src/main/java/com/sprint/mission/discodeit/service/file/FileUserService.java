@@ -4,77 +4,97 @@ import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.UserService;
 
 import java.io.*;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class FileUserService implements UserService {
-    private static final String FILE_PATH = "users.ser";
-    private final Map<UUID, User> data;
+    private final Path DIRECTORY;
+    private final String EXTENSION = ".ser";
 
     public FileUserService() {
-        this.data = load();
+        this.DIRECTORY = Paths.get(System.getProperty("user.dir"), "file-data-map", User.class.getSimpleName());
+        if (Files.notExists(DIRECTORY)) {
+            try {
+                Files.createDirectories(DIRECTORY);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to create directory: " + DIRECTORY, e);
+            }
+        }
+    }
+
+    private Path resolvePath(UUID id) {
+        return DIRECTORY.resolve(id + EXTENSION);
     }
 
     // 직렬화
-    private void save() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILE_PATH))) {
-            oos.writeObject(data);
-            System.out.println("파일 저장 완료: " + FILE_PATH);
+    private void saveToFile(User user) {
+        Path path = resolvePath(user.getId());
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path.toFile()))) {
+            oos.writeObject(user);
         } catch (IOException e) {
-            System.out.println("파일 저장 실패" + e.getMessage());
-            e.printStackTrace();
+            throw new RuntimeException("Failed to save file: " + path, e);
         }
     }
 
     // 역직렬화
-    @SuppressWarnings("unchecked") // 타입캐스팅 경고 무시
-    private Map<UUID, User> load() {
-        File file = new File(FILE_PATH);
-
-        // 파일 검증
-        if (!file.exists()) {
-            return new HashMap<>();
-        }
-
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
-            return (Map<UUID, User>) ois.readObject();
+    private User loadFromFile(Path path) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path.toFile()))) {
+            return (User) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            System.out.println("파일 불러오기 실패");
-            e.printStackTrace();
-            return new HashMap<>();
+            throw new RuntimeException("Failed to read file: " + path, e);
         }
     }
 
     @Override
     public User create(String userName, String nickname, String description, String email, String password, String profileImage) {
         User user = new User(userName, nickname, description, email, password, profileImage);
-        data.put(user.getId(), user);
-        save();
+        saveToFile(user);
         return user;
     }
 
     @Override
     public User findById(UUID id) {
-        return Optional.ofNullable(data.get(id))
-                .orElseThrow(() -> new NoSuchElementException("User with id " + id + " not found"));
+        Path path = resolvePath(id);
+        if (Files.notExists(path)) {
+            throw new NoSuchElementException("User with id " + id + " not found");
+        }
+        return loadFromFile(path);
     }
 
     @Override
     public List<User> findAll() {
-        return new ArrayList<>(data.values());
+        try (var pathStream = Files.list(DIRECTORY)) {
+            return pathStream
+                    .filter(path -> path.toString().endsWith(EXTENSION))
+                    .map(this::loadFromFile)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read directory: " + DIRECTORY, e);
+        }
     }
 
     @Override
     public User update(UUID id, String userName, String nickname, String description, String email, String password, String profileImage) {
         User user = findById(id);
         user.update(userName, nickname, description, email, password, profileImage);
-        save();
+        saveToFile(user);
         return user;
     }
 
     @Override
     public void delete(UUID id) {
         findById(id);
-        data.remove(id);
-        save();
+        Path path = resolvePath(id);
+
+        try {
+            Files.delete(path);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete file: " + path, e);
+        }
     }
 }
