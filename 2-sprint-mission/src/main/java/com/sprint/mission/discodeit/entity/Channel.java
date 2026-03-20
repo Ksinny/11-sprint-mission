@@ -1,8 +1,11 @@
 package com.sprint.mission.discodeit.entity;
 
+import lombok.Getter;
+
 import java.util.List;
 import java.util.UUID;
 
+@Getter
 public class Channel extends BaseEntity {
     private ChannelType type;
     private String name;
@@ -15,22 +18,6 @@ public class Channel extends BaseEntity {
         this.name = name;
         this.description = description;
         this.memberIds = memberIds;
-    }
-
-    public ChannelType getType() {
-        return type;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public List<UUID> getMemberIds() {
-        return memberIds;
     }
 
     public void update(ChannelType newType, String newName, String newDescription, List<UUID> newMemberIds) {
