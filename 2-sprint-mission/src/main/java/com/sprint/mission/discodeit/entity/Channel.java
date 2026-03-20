@@ -6,12 +6,14 @@ import java.util.UUID;
 public class Channel extends BaseEntity {
     private ChannelType type;
     private String name;
+    private String description;
     private List<UUID> memberIds;
 
-    public Channel(ChannelType type, String name, List<UUID> memberIds) {
+    public Channel(ChannelType type, String name, String description, List<UUID> memberIds) {
         super();
         this.type = type;
         this.name = name;
+        this.description = description;
         this.memberIds = memberIds;
     }
 
@@ -23,15 +25,37 @@ public class Channel extends BaseEntity {
         return name;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
     public List<UUID> getMemberIds() {
         return memberIds;
     }
 
-    public void update(ChannelType type, String name, List<UUID> memberIds) {
-        this.type = type;
-        this.name = name;
-        this.memberIds = memberIds;
-        super.timeUpdate();
+    public void update(ChannelType newType, String newName, String newDescription, List<UUID> newMemberIds) {
+        boolean anyValueUpdated = false;
+
+        if (newType != null && !newType.equals(this.type)) {
+            this.type = newType;
+            anyValueUpdated = true;
+        }
+        if (newName != null && !newName.equals(this.name)) {
+            this.name = newName;
+            anyValueUpdated = true;
+        }
+        if (newDescription != null && !newDescription.equals(this.description)) {
+            this.description = newDescription;
+            anyValueUpdated = true;
+        }
+        if (newMemberIds != null && !newMemberIds.equals(this.memberIds)) {
+            this.memberIds = newMemberIds;
+            anyValueUpdated = true;
+        }
+
+        if (anyValueUpdated) {
+            super.timeUpdate();
+        }
     }
 
     @Override
@@ -39,6 +63,7 @@ public class Channel extends BaseEntity {
         return "Channel [" +
                 "UUID: " + getId() +
                 "\n이름: " + getName() +
+                ", 설명: " + getDescription() +
                 ", 타입: " + getType().getName() +
                 ", 참여 인원: " + (getMemberIds() != null ? getMemberIds().size() : 0) + "명" +
                 ", 생성 시간: " + getCreatedAt() +

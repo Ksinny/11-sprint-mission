@@ -27,7 +27,7 @@ public class JCFMessageService implements MessageService {
     @Override
     public void create(Message message) {
         // 유저 검증
-        if (userService.findById(message.getSenderId()) == null) {
+        if (userService.findById(message.getAuthorId()) == null) {
             System.out.println("존재하지 않는 유저입니다. 메시지 전송 실패");
             return;
         }
@@ -41,7 +41,7 @@ public class JCFMessageService implements MessageService {
 
         // 채널 멤버 검증
         if (channel.getType() == ChannelType.PRIVATE || channel.getType() == ChannelType.DM) {
-            if (!channel.getMemberIds().contains(message.getSenderId())) {
+            if (!channel.getMemberIds().contains(message.getAuthorId())) {
                 System.out.println("해당 채널의 멤버가 아닙니다. 메시지 전송 실패");
                 return;
             }

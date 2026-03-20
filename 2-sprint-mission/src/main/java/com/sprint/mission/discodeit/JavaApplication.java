@@ -20,13 +20,13 @@ import java.util.UUID;
 public class JavaApplication {
 
     static User setupUser(UserService userService) {
-        User user = new User("woody", "우디", "안녕", "woody@codeit.com", "profile.png");
+        User user = new User("woody", "우디", "안녕", "woody@codeit.com", "password", "profile.png");
         userService.create(user);
         return user;
     }
 
     static Channel setupChannel(ChannelService channelService) {
-        Channel channel = new Channel(ChannelType.PUBLIC, "공지", List.of());
+        Channel channel = new Channel(ChannelType.PUBLIC, "공지", "", List.of());
         channelService.create(channel);
         return channel;
     }
@@ -54,8 +54,8 @@ public class JavaApplication {
 
 
         System.out.println("\n========== 유저 테스트 ==========");
-        User user1 = new User("이경신", "경신", "안녕하세요.", "dosly2@nave.com", "profile.png");
-        User user2 = new User("김경신", "경신", "스프링 공부중입니다.", "dosly2@gmail.com", "img.png");
+        User user1 = new User("이경신", "경신", "안녕하세요.", "dosly2@nave.com", "password" , "profile.png");
+        User user2 = new User("김경신", "경신", "스프링 공부중입니다.", "dosly2@gmail.com", "password" , "img.png");
 
         System.out.println("---------- 유저 등록 ----------");
         userService.create(user1);
@@ -78,8 +78,8 @@ public class JavaApplication {
 
 
         System.out.println("\n========== 채널 테스트 ==========");
-        Channel channel1 = new Channel(ChannelType.PUBLIC, "코드잇 SB 11기", List.of());
-        Channel channel2 = new Channel(ChannelType.PRIVATE, "SB_2팀", List.of(user2.getId()));
+        Channel channel1 = new Channel(ChannelType.PUBLIC, "코드잇 SB 11기", "Spring BackEnd", List.of());
+        Channel channel2 = new Channel(ChannelType.PRIVATE, "SB_2팀", "SB 11기 2팀 전용 채널", List.of(user2.getId()));
 
         System.out.println("---------- 채널 등록 ----------");
         channelService.create(channel1);
@@ -126,10 +126,10 @@ public class JavaApplication {
 
 
         System.out.println("\n========== 심화 검증 테스트 ==========");
-        User teacher = new User("주강사", "강사", "SB 코스 강사입니다.", "wnrkdtk@naver.com", "hello.png");
+        User teacher = new User("주강사", "강사", "SB 코스 강사입니다.", "wnrkdtk@naver.com","password" , "hello.png");
         userService.create(teacher);
 
-        Channel privateChannel = new Channel(ChannelType.PRIVATE, "비밀 채팅방", List.of());
+        Channel privateChannel = new Channel(ChannelType.PRIVATE, "비밀 채팅방", "비밀 채팅방입니다.", List.of());
         channelService.create(privateChannel);
 
         System.out.print("등록된 유저가 아닐 시 -> ");
