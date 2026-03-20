@@ -5,8 +5,9 @@ import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 
 public class BasicChannelService implements ChannelService {
@@ -18,49 +19,41 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public void create(Channel channel) {
-        // 채널 중복 검증
-        if (channelRepository.findById(channel.getId()) != null) {
-            System.out.println("이미 존재하는 채널 ID입니다.");
-            return;
-        }
-        
+    public Channel create(ChannelType type, String name, String description, List<UUID> memberIds) {
+        Channel channel = new Channel(type, name, description, memberIds);
+
         // 채널 저장
         channelRepository.save(channel);
-        System.out.println(channel.getName() + " 채널이 생성되었습니다.");
+        return channel;
     }
 
     @Override
     public Channel findById(UUID id) {
-        return channelRepository.findById(id);
-    }
-
-    @Override
-    public Collection<Channel> findAll() {
-        return channelRepository.findAll();
-    }
-
-    @Override
-    public void update(UUID id, ChannelType type, String name, List<UUID> memberIds) {
         Channel channel = channelRepository.findById(id);
-        if (channel != null) {
-            channel.update(type, name, memberIds);
-
-            channelRepository.save(channel); // 수정된 채널 덮어쓰며 저장
-            System.out.println(name + " 채널 정보가 수정되었습니다.");
-        } else {
-            System.out.println("해당 채널을 찾을 수 없습니다.");
+        if (channel == null) {
+            throw new NoSuchElementException("Channel with id " + id + " not found");
         }
+        return channel;
+    }
+
+    @Override
+    public List<Channel> findAll() {
+        return new ArrayList<>(channelRepository.findAll());
+    }
+
+    @Override
+    public Channel update(UUID id, ChannelType type, String name, String description, List<UUID> memberIds) {
+        Channel channel = findById(id);
+        channel.update(type, name, description, memberIds);
+
+        channelRepository.save(channel); // 수정된 채널 덮어쓰며 저장
+        return channel;
     }
 
     @Override
     public void delete(UUID id) {
-        Channel channel = channelRepository.findById(id);
-        if (channel != null) {
-            channelRepository.delete(id); // 채널 삭제
-            System.out.println("채널이 정상적으로 삭제되었습니다.");
-        } else {
-            System.out.println("해당 채널을 찾을 수 없습니다.");
-        }
+        findById(id);
+
+        channelRepository.delete(id); // 채널 삭제
     }
 }
