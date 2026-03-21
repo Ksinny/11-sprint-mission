@@ -2,6 +2,8 @@ package com.sprint.mission.discodeit.entity;
 
 import lombok.Getter;
 
+import java.util.UUID;
+
 @Getter
 public class User extends BaseEntity {
     private String userName;
@@ -9,20 +11,20 @@ public class User extends BaseEntity {
     private String description;
     private String email;
     private String password;
-    private String profileImage;
+    private UUID profileImageId;
 
 
-    public User(String userName, String nickname, String description, String email, String password, String profileImage) {
+    public User(String userName, String nickname, String description, String email, String password, UUID profileImageId) {
         super();
         this.userName = userName;
         this.nickname = nickname;
         this.description = description;
         this.email = email;
         this.password = password;
-        this.profileImage = profileImage;
+        this.profileImageId = null;
     }
 
-    public void update(String newUserName, String newNickname, String newDescription, String newEmail, String newPassword, String newProfileImage) {
+    public void update(String newUserName, String newNickname, String newDescription, String newEmail, String newPassword) {
         boolean anyValueUpdated = false;
 
         if (newUserName != null && !newUserName.equals(this.userName)) {
@@ -45,14 +47,18 @@ public class User extends BaseEntity {
             this.password = newPassword;
             anyValueUpdated = true;
         }
-        if (newProfileImage != null && !newProfileImage.equals(this.profileImage)) {
-            this.profileImage = newProfileImage;
-            anyValueUpdated = true;
-        }
 
         if (anyValueUpdated) {
             super.timeUpdate();
         }
+    }
+
+    // 프로필 이미지 수정
+    public void updateProfileImage(UUID newProfileImageId) {
+        if (newProfileImageId != null && !newProfileImageId.equals(this.profileImageId)) {
+            this.profileImageId = newProfileImageId;
+        }
+        super.timeUpdate();
     }
 
     @Override
@@ -64,7 +70,7 @@ public class User extends BaseEntity {
                 ", 소개: " + getDescription() +
                 ", 이메일: " + getEmail() +
                 ", 비밀번호: " + getPassword() + // 추후 비밀번호 관련 로직 변경 예정
-                ", 프로필 사진: " + getProfileImage() +
+                ", 프로필 사진: " + getProfileImageId() +
                 ", 생성 시간: " + getCreatedAt() +
                 ", 수정 시간: " + getUpdatedAt() +
                 "]\n" ;

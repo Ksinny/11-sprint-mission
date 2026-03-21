@@ -59,7 +59,7 @@ public class FileMessageService implements MessageService {
     }
 
     @Override
-    public Message create(String content, UUID authorId, UUID channelId) {
+    public Message create(String content, UUID authorId, UUID channelId, List<UUID> attachmentIds) {
         userService.findById(authorId);
         Channel channel = channelService.findById(channelId);
 
@@ -69,7 +69,7 @@ public class FileMessageService implements MessageService {
             }
         }
 
-        Message message = new Message(content, authorId, channelId);
+        Message message = new Message(content, authorId, channelId, attachmentIds);
         saveToFile(message);
         return message;
     }

@@ -18,11 +18,12 @@ import com.sprint.mission.discodeit.service.basic.BasicMessageService;
 import com.sprint.mission.discodeit.service.basic.BasicUserService;
 
 import java.util.List;
+import java.util.UUID;
 
 
 public class JavaApplication {
     static User setupUser(UserService userService) {
-        return userService.create("woody", "우디", "안녕", "woody@codeit.com", "password", "profile.png");
+        return userService.create("woody", "우디", "안녕", "woody@codeit.com", "password", UUID.randomUUID());
     }
 
     static Channel setupChannel(ChannelService channelService) {
@@ -30,7 +31,7 @@ public class JavaApplication {
     }
 
     static void messageCreateTest(MessageService messageService, Channel channel, User author) {
-        Message message = messageService.create("안녕하세요.", author.getId(), channel.getId());
+        Message message = messageService.create("안녕하세요.", author.getId(), channel.getId(), null);
         System.out.println("메시지 생성: " + message.getId());
     }
 

@@ -2,6 +2,8 @@ package com.sprint.mission.discodeit.entity;
 
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -9,12 +11,17 @@ public class Message extends BaseEntity {
     private String content;
     private final UUID authorId;
     private final UUID channelId;
+    private List<UUID> attachmentIds = new ArrayList<>();
 
-    public Message(String content, UUID authorId, UUID channelId) {
+    public Message(String content, UUID authorId, UUID channelId, List<UUID> attachmentIds) {
         super();
         this.content = content;
         this.authorId = authorId;
         this.channelId = channelId;
+
+        if (attachmentIds != null) {
+            this.attachmentIds.addAll(attachmentIds);
+        }
     }
 
     // 메시지 내용만 수정 가능
@@ -29,6 +36,15 @@ public class Message extends BaseEntity {
         if (anyValueUpdated) {
             super.timeUpdate();
         }
+    }
+
+    // 첨부파일 추가
+    public void addAttachment(UUID attachmentId) {
+        if (this.attachmentIds == null) {
+            this.attachmentIds = new ArrayList<>();
+        }
+        this.attachmentIds.add(attachmentId);
+        super.timeUpdate();
     }
 
     @Override

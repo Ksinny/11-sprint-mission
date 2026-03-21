@@ -28,7 +28,7 @@ public class JCFMessageService implements MessageService {
     }
 
     @Override
-    public Message create(String content, UUID authorId, UUID channelId) {
+    public Message create(String content, UUID authorId, UUID channelId, List<UUID> attachmentIds) {
         userService.findById(authorId); // 유저 검증
         Channel channel = channelService.findById(channelId); // 채널 검증
 
@@ -39,7 +39,7 @@ public class JCFMessageService implements MessageService {
             }
         }
 
-        Message message = new Message(content, authorId, channelId);
+        Message message = new Message(content, authorId, channelId, attachmentIds);
         data.put(message.getId(), message);
         return message;
     }
