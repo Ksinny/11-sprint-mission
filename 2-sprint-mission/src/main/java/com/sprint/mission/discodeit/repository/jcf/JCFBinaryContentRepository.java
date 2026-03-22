@@ -25,8 +25,16 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
     }
 
     @Override
-    public List<BinaryContent> findAll() {
-        return data.values().stream().toList();
+    public List<BinaryContent> findAllByIdIn(List<UUID> ids) {
+        // 1. 전달받은 ids가 null이거나 비어있으면 빈 리스트 반환
+        if (ids == null || ids.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 2. storage의 값들 중 id가 요청 리스트(ids)에 포함된 것만 필터링
+        return data.values().stream()
+                .filter(content -> ids.contains(content.getId()))
+                .toList();
     }
 
     @Override
