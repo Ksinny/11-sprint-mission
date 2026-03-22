@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.MessageDto;
 import com.sprint.mission.discodeit.entity.Message;
+import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -19,6 +20,7 @@ public class BasicMessageService implements MessageService {
     private final MessageRepository messageRepository;
     private final ChannelRepository channelRepository;
     private final UserRepository userRepository;
+    private final BinaryContentRepository binaryContentRepository;
 
 
     @Override
@@ -62,9 +64,11 @@ public class BasicMessageService implements MessageService {
 
     @Override
     public void delete(UUID id) {
-        if (!messageRepository.existsById(id)) {
-            throw new NoSuchElementException("Message with id " + id + " not found");
-        }
+        Message message = messageRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Message with id " + id + " not found"));
+
+        message.getAttachmentIds().forEach(binaryContentRepository::deleteById);
+
         messageRepository.deleteById(id);
     }
 }
