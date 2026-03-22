@@ -50,11 +50,14 @@ public class BasicMessageService implements MessageService {
     }
 
     @Override
-    public Message update(UUID id, String content) {
-//        Message message = findById(id);
-//        message.update(content);
-//        return messageRepository.save(message);
-        return null;
+    public MessageDto.Response update(UUID id, MessageDto.UpdateRequest request) {
+        Message message = messageRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Message with id " + id + " not found"));
+
+        message.update(request.content());
+        messageRepository.save(message);
+
+        return MessageDto.Response.of(message);
     }
 
     @Override

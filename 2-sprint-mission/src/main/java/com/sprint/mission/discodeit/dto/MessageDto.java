@@ -26,6 +26,10 @@ public class MessageDto {
         }
     }
 
+    public record UpdateRequest(
+            String content
+    ) {}
+
     public record Response(
         UUID id,
         String content,
