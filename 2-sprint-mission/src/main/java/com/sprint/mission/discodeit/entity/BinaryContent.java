@@ -1,5 +1,7 @@
 package com.sprint.mission.discodeit.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import java.io.Serial;
 import java.io.Serializable;
@@ -7,6 +9,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Getter
+@Builder
+@AllArgsConstructor
 public class BinaryContent implements Serializable {
 
     @Serial

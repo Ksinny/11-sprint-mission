@@ -66,15 +66,12 @@ public class FileBinaryContentRepository implements BinaryContentRepository {
     }
 
     @Override
-    public List<BinaryContent> findAll() {
-        try (var pathStream = Files.list(DIRECTORY)) {
-            return pathStream
-                    .filter(path -> path.toString().endsWith(EXTENSION))
-                    .map(this::loadFromFile)
-                    .collect(Collectors.toList());
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read directory: " + DIRECTORY, e);
-        }
+    public List<BinaryContent> findAllByIdIn(List<UUID> ids) {
+        return ids.stream()
+                .map(this::resolvePath)          // ID를 경로(Path)로 변환
+                .filter(Files::exists)           // 해당 경로에 파일이 실제로 존재하는지 확인
+                .map(this::loadFromFile)         // 파일 읽기 (역직렬화)
+                .collect(Collectors.toList());
     }
 
     @Override
