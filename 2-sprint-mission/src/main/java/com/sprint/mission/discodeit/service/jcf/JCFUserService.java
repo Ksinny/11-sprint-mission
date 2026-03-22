@@ -1,3 +1,4 @@
+/*
 package com.sprint.mission.discodeit.service.jcf;
 
 import com.sprint.mission.discodeit.entity.User;
@@ -49,4 +50,4 @@ public class JCFUserService implements UserService {
         User user = findById(id);
         data.remove(id);
     }
-}
+}*/
