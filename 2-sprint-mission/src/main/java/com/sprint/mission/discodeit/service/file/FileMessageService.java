@@ -1,3 +1,4 @@
+/*
 package com.sprint.mission.discodeit.service.file;
 
 import com.sprint.mission.discodeit.entity.Channel;
@@ -114,4 +115,4 @@ public class FileMessageService implements MessageService {
             throw new RuntimeException("Failed to delete file: " + path, e);
         }
     }
-}
+}*/
