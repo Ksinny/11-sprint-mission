@@ -31,6 +31,15 @@ public class UserDto {
         }
     }
 
+    public record UpdateRequest(
+            String username,
+            String nickname,
+            String description,
+            String email,
+            String password,
+            UUID profileImageId
+    ) {}
+
     @Builder
     public record Response(
             UUID id,

@@ -49,7 +49,7 @@ public class BasicUserService implements UserService {
                 .orElseThrow(() -> new NoSuchElementException("User with id " + id + " not found"));
 
         UserStatus userStatus = userStatusRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("User with id " + id + " not found"));
+                .orElseThrow(() -> new NoSuchElementException("UserStatus with id " + id + " not found"));
 
         return UserDto.Response.of(user, userStatus);
     }
@@ -68,12 +68,26 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public User update(UUID id, String userName, String nickname, String description, String email, String password, UUID profileImageId) {
-/*        User user = findById(id);
-        user.update(userName, nickname, description, email, password);
-        user.updateProfileImage(profileImageId);
-        return userRepository.save(user);*/
-        return null;
+    public UserDto.Response update(UUID id, UserDto.UpdateRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("User with id " + id + " not found"));
+
+        user.update(
+                request.username(),
+                request.nickname(),
+                request.description(),
+                request.email(),
+                request.password()
+        );
+        user.updateProfileImage(request.profileImageId());
+
+        userRepository.save(user);
+
+        // 상태 정보 반환
+        UserStatus status = userStatusRepository.findById(id)
+                .orElseGet(() -> new UserStatus(id));
+
+        return UserDto.Response.of(user, status);
     }
 
     @Override
