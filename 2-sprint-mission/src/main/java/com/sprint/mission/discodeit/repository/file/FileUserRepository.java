@@ -91,4 +91,26 @@ public class FileUserRepository implements UserRepository {
             throw new RuntimeException("Failed to delete file: " + path, e);
         }
     }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        // 모든 파일을 읽어서 이메일이 일치하는 게 하나라도 있는지 확인
+        return findAll().stream()
+                .anyMatch(user -> user.getEmail().equals(email));
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        // 모든 파일을 읽어서 이름이 일치하는 게 하나라도 있는지 확인
+        return findAll().stream()
+                .anyMatch(user -> user.getUserName().equals(name));
+    }
+
+    @Override
+    public Optional<User> findByName(String userName) {
+        // 모든 파일을 읽어서 이름이 일치하는 첫 번째 유저 반환
+        return findAll().stream()
+                .filter(user -> user.getUserName().equals(userName))
+                .findFirst();
+    }
 }

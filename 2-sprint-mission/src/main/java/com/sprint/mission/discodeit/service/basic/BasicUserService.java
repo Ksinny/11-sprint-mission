@@ -104,7 +104,6 @@ public class BasicUserService implements UserService {
         if (user.getProfileImageId() != null) {
             binaryContentRepository.deleteById(user.getProfileImageId());
         }
-
         userRepository.deleteById(id);
     }
 }
