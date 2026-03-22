@@ -91,11 +91,17 @@ public class BasicChannelService implements ChannelService {
     }
 
     @Override
-    public Channel update(UUID id, ChannelType type, String name, String description, List<UUID> memberIds) {
-//        Channel channel = findById(id);
-//        channel.update(type, name, description, memberIds);
-//        return channelRepository.save(channel);
-        return null;
+    public ChannelDto.Response update(UUID id, ChannelDto.UpdateRequest request) {
+        Channel channel = channelRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Channel not found with id " + id));
+
+
+        if (channel.getType() == ChannelType.PRIVATE) {
+            throw new IllegalStateException("PRIVATE channels cannot be updated.");
+        }
+
+        channel.update(request.name(), request.description());
+        return toResponse(channel);
     }
 
     @Override

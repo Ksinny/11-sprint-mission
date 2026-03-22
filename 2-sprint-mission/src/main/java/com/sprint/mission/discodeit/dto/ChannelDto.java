@@ -38,6 +38,11 @@ public class ChannelDto {
         }
     }
 
+    public record UpdateRequest(
+            String name,
+            String description
+    ) {}
+
     @Builder
     public record Response(
             UUID id,

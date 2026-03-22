@@ -16,23 +16,15 @@ public class Channel extends BaseEntity {
     private String description;
     private List<UUID> memberIds;
 
-    public void update(ChannelType newType, String newName, String newDescription, List<UUID> newMemberIds) {
+    public void update(String newName, String newDescription) {
         boolean anyValueUpdated = false;
 
-        if (newType != null && !newType.equals(this.type)) {
-            this.type = newType;
-            anyValueUpdated = true;
-        }
         if (newName != null && !newName.equals(this.name)) {
             this.name = newName;
             anyValueUpdated = true;
         }
         if (newDescription != null && !newDescription.equals(this.description)) {
             this.description = newDescription;
-            anyValueUpdated = true;
-        }
-        if (newMemberIds != null && !newMemberIds.equals(this.memberIds)) {
-            this.memberIds = newMemberIds;
             anyValueUpdated = true;
         }
 
