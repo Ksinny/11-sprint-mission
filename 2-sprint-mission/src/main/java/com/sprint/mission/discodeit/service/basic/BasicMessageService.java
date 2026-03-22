@@ -36,22 +36,25 @@ public class BasicMessageService implements MessageService {
         return MessageDto.Response.of(message);
     }
 
-    @Override
-    public Message findById(UUID id) {
-        return messageRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Message with id " + id + " not found"));
-    }
 
     @Override
-    public List<Message> findAll() {
-        return messageRepository.findAll();
+    public List<MessageDto.Response> findAllByChannelId(UUID channelId) {
+        if (!channelRepository.existsById(channelId)) {
+            throw new NoSuchElementException("Channel not found with id " + channelId);
+        }
+
+        return messageRepository.findAll().stream()
+                .filter(message -> message.getChannelId().equals(channelId))
+                .map(MessageDto.Response::of)
+                .toList();
     }
 
     @Override
     public Message update(UUID id, String content) {
-        Message message = findById(id);
-        message.update(content);
-        return messageRepository.save(message);
+//        Message message = findById(id);
+//        message.update(content);
+//        return messageRepository.save(message);
+        return null;
     }
 
     @Override

@@ -32,6 +32,7 @@ public class MessageDto {
         List<UUID> attachmentIds,
         Instant createdAt
     ) {
+        // Entity -> DTO
         public static Response of(Message message) {
             return new Response(
                 message.getId(),
