@@ -9,9 +9,10 @@ import java.util.UUID;
 public interface UserRepository {
     User save(User user);
     Optional<User> findById(UUID id);
+    Optional<User> findByName(String userName);
     List<User> findAll();
     boolean existsById(UUID id);
     void deleteById(UUID id);
-    public boolean existsByName(String name);
-    public boolean existsByEmail(String email);
+    boolean existsByName(String name);
+    boolean existsByEmail(String email);
 }

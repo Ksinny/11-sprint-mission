@@ -91,4 +91,11 @@ public class FileUserStatusRepository implements UserStatusRepository {
             throw new RuntimeException("Failed to delete file: " + path, e);
         }
     }
+
+    @Override
+    public Optional<UserStatus> findByUserId(UUID userId) {
+        return findAll().stream()
+                .filter(status -> status.getUserId().equals(userId))
+                .findFirst();
+    }
 }
