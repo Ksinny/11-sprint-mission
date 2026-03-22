@@ -1,24 +1,25 @@
-/*
-package com.sprint.mission.discodeit.service.file;
+package com.sprint.mission.discodeit.repository.file;
 
-import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.repository.UserStatusRepository;
+import org.springframework.stereotype.Repository;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class FileUserService implements UserService {
+@Repository
+public class FileUserStatusRepository implements UserStatusRepository {
     private final Path DIRECTORY;
     private final String EXTENSION = ".ser";
 
-    public FileUserService() {
-        this.DIRECTORY = Paths.get(System.getProperty("user.dir"), "file-data-map", User.class.getSimpleName());
+    public FileUserStatusRepository() {
+        this.DIRECTORY = Paths.get(System.getProperty("user.dir"), "file-data-map", UserStatus.class.getSimpleName());
         if (Files.notExists(DIRECTORY)) {
             try {
                 Files.createDirectories(DIRECTORY);
@@ -32,43 +33,40 @@ public class FileUserService implements UserService {
         return DIRECTORY.resolve(id + EXTENSION);
     }
 
-    // 직렬화
-    private void saveToFile(User user) {
-        Path path = resolvePath(user.getId());
+    private void saveToFile(UserStatus userStatus) {
+        Path path = resolvePath(userStatus.getId());
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path.toFile()))) {
-            oos.writeObject(user);
+            oos.writeObject(userStatus);
         } catch (IOException e) {
             throw new RuntimeException("Failed to save file: " + path, e);
         }
     }
 
-    // 역직렬화
-    private User loadFromFile(Path path) {
+    private UserStatus loadFromFile(Path path) {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path.toFile()))) {
-            return (User) ois.readObject();
+            return (UserStatus) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException("Failed to read file: " + path, e);
         }
     }
 
     @Override
-    public User create(String userName, String nickname, String description, String email, String password, UUID profileImageId) {
-        User user = new User(userName, nickname, description, email, password, profileImageId);
-        saveToFile(user);
-        return user;
+    public UserStatus save(UserStatus userStatus) {
+        saveToFile(userStatus);
+        return userStatus;
     }
 
     @Override
-    public User findById(UUID id) {
+    public Optional<UserStatus> findById(UUID id) {
         Path path = resolvePath(id);
         if (Files.notExists(path)) {
-            throw new NoSuchElementException("User with id " + id + " not found");
+            return Optional.empty();
         }
-        return loadFromFile(path);
+        return Optional.of(loadFromFile(path));
     }
 
     @Override
-    public List<User> findAll() {
+    public List<UserStatus> findAll() {
         try (var pathStream = Files.list(DIRECTORY)) {
             return pathStream
                     .filter(path -> path.toString().endsWith(EXTENSION))
@@ -80,23 +78,17 @@ public class FileUserService implements UserService {
     }
 
     @Override
-    public User update(UUID id, String userName, String nickname, String description, String email, String password, UUID profileImageId) {
-        User user = findById(id);
-        user.update(userName, nickname, description, email, password);
-        user.updateProfileImage(profileImageId);
-        saveToFile(user);
-        return user;
+    public boolean existsById(UUID id) {
+        return Files.exists(resolvePath(id));
     }
 
     @Override
-    public void delete(UUID id) {
-        findById(id);
+    public void deleteById(UUID id) {
         Path path = resolvePath(id);
-
         try {
-            Files.delete(path);
+            Files.deleteIfExists(path);
         } catch (IOException e) {
             throw new RuntimeException("Failed to delete file: " + path, e);
         }
     }
-}*/
+}

@@ -1,10 +1,14 @@
 package com.sprint.mission.discodeit.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.util.UUID;
 
+@Builder
 @Getter
+@AllArgsConstructor
 public class User extends BaseEntity {
     private String userName;
     private String nickname;
@@ -14,15 +18,6 @@ public class User extends BaseEntity {
     private UUID profileImageId;
 
 
-    public User(String userName, String nickname, String description, String email, String password, UUID profileImageId) {
-        super();
-        this.userName = userName;
-        this.nickname = nickname;
-        this.description = description;
-        this.email = email;
-        this.password = password;
-        this.profileImageId = null;
-    }
 
     public void update(String newUserName, String newNickname, String newDescription, String newEmail, String newPassword) {
         boolean anyValueUpdated = false;

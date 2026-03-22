@@ -1,7 +1,10 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.UserDto;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.repository.UserRepository;
+import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,11 +17,35 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BasicUserService implements UserService {
     private final UserRepository userRepository;
+    private final UserStatusRepository userStatusRepository;
+
 
     @Override
-    public User create(String userName, String nickname, String description, String email, String password, UUID profileImageId) {
-        User user = new User(userName, nickname, description, email, password, profileImageId);
-        return userRepository.save(user);
+    public UserDto.Response create(UserDto.CreateRequest request) {
+        // username 중복 확인
+        if (userRepository.existsByName(request.userName())) {
+            throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
+        }
+
+        // email 중복 확인
+        if (userRepository.existsByEmail(request.email())) {
+            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+        }
+
+        // toEntity()로 유저 등록
+        User user = request.toEntity();
+        userRepository.save(user);
+
+        // UserStatus 함께 생성
+        UserStatus userStatus = new UserStatus(user.getId());
+        userStatusRepository.save(userStatus);
+
+        return new UserDto.Response(
+                user.getId(),
+                user.getUserName(),
+                user.getEmail(),
+                userStatus.isOnline()
+        );
     }
 
     @Override
