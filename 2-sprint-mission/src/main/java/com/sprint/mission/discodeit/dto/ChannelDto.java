@@ -4,6 +4,7 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import lombok.Builder;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,18 +40,22 @@ public class ChannelDto {
 
     @Builder
     public record Response(
-        UUID id,
-        String name,
-        String description,
-        ChannelType type
+            UUID id,
+            String name,
+            String description,
+            ChannelType type,
+            Instant lastMessageAt,
+            List<UUID> userIds
     ) {
-        // Entity -> DTO
-        public static Response of(Channel channel) {
+        // 엔티티와 외부 데이터를 조합하여 Response를 만드는 정적 팩토리 메서드
+        public static Response of(Channel channel, Instant lastMessageAt, List<UUID> userIds) {
             return Response.builder()
                     .id(channel.getId())
                     .name(channel.getName())
                     .description(channel.getDescription())
                     .type(channel.getType())
+                    .lastMessageAt(lastMessageAt)
+                    .userIds(channel.getType() == ChannelType.PRIVATE ? userIds : null)
                     .build();
         }
     }
