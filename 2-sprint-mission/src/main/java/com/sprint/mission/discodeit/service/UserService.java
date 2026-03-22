@@ -7,8 +7,8 @@ import java.util.UUID;
 
 public interface UserService {
     UserDto.Response create(UserDto.CreateRequest request);
-    User findById(UUID id);
-    List<User> findAll();
+    UserDto.Response findById(UUID id);
+    List<UserDto.Response> findAll();
     User update(UUID id, String userName, String nickname, String description, String email, String password, UUID profileImageId);
     void delete(UUID id);
 }

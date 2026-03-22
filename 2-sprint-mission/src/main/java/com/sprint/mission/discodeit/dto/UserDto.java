@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.dto;
 
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.UserStatus;
 import lombok.Builder;
 
 import java.time.Instant;
@@ -17,6 +18,7 @@ public class UserDto {
             String description,
             UUID profileImageId // 선택적으로 프로필 이미지 등록
     ) {
+        // DTO -> Entity
         public User toEntity() {
             return User.builder()
                     .userName(this.userName)
@@ -33,7 +35,26 @@ public class UserDto {
     public record Response(
             UUID id,
             String username,
+            String nickname,    // 추가
             String email,
-            boolean isOnline
-    ) {}
+            String description, // 추가
+            UUID profileImageId, // 추가
+            boolean isOnline,   // 핵심!
+            Instant lastActivityAt // 추가
+    ) {
+
+        // Entity -> DTO
+        public static Response of(User user, UserStatus status) {
+            return Response.builder()
+                    .id(user.getId())
+                    .username(user.getUserName())
+                    .nickname(user.getNickname())
+                    .email(user.getEmail())
+                    .description(user.getDescription())
+                    .profileImageId(user.getProfileImageId())
+                    .isOnline(status.isOnline())
+                    .lastActivityAt(status.getLastActiveAt())
+                    .build();
+        }
+    }
 }

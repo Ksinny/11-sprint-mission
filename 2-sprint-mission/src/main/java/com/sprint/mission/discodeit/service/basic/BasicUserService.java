@@ -24,12 +24,12 @@ public class BasicUserService implements UserService {
     public UserDto.Response create(UserDto.CreateRequest request) {
         // username 중복 확인
         if (userRepository.existsByName(request.userName())) {
-            throw new IllegalArgumentException("이미 사용 중인 아이디입니다.");
+            throw new IllegalArgumentException("User with name " + request.userName() + " already exists");
         }
 
         // email 중복 확인
         if (userRepository.existsByEmail(request.email())) {
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+            throw new IllegalArgumentException("User with email " + request.email() + " already exists");
         }
 
         // toEntity()로 유저 등록
@@ -40,31 +40,40 @@ public class BasicUserService implements UserService {
         UserStatus userStatus = new UserStatus(user.getId());
         userStatusRepository.save(userStatus);
 
-        return new UserDto.Response(
-                user.getId(),
-                user.getUserName(),
-                user.getEmail(),
-                userStatus.isOnline()
-        );
+        return UserDto.Response.of(user, userStatus);
     }
 
     @Override
-    public User findById(UUID id) {
-        return userRepository.findById(id)
+    public UserDto.Response findById(UUID id) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("User with id " + id + " not found"));
+
+        UserStatus userStatus = userStatusRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("User with id " + id + " not found"));
+
+        return UserDto.Response.of(user, userStatus);
     }
 
     @Override
-    public List<User> findAll() {
-        return userRepository.findAll();
+    public List<UserDto.Response> findAll() {
+        List<User> users = userRepository.findAll();
+
+        return users.stream()
+                .map(user -> {
+                    UserStatus status = userStatusRepository.findById(user.getId())
+                            .orElseGet(() -> new UserStatus(user.getId()));
+                    return UserDto.Response.of(user, status);
+                })
+                .toList();
     }
 
     @Override
     public User update(UUID id, String userName, String nickname, String description, String email, String password, UUID profileImageId) {
-        User user = findById(id);
+/*        User user = findById(id);
         user.update(userName, nickname, description, email, password);
         user.updateProfileImage(profileImageId);
-        return userRepository.save(user);
+        return userRepository.save(user);*/
+        return null;
     }
 
     @Override
