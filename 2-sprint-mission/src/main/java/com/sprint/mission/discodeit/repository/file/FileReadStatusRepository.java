@@ -1,25 +1,25 @@
-/*
-package com.sprint.mission.discodeit.service.file;
+package com.sprint.mission.discodeit.repository.file;
 
-import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.ChannelType;
-import com.sprint.mission.discodeit.service.ChannelService;
+import com.sprint.mission.discodeit.entity.ReadStatus;
+import com.sprint.mission.discodeit.repository.ReadStatusRepository;
+import org.springframework.stereotype.Repository;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class FileChannelService implements ChannelService {
+@Repository
+public class FileReadStatusRepository implements ReadStatusRepository {
     private final Path DIRECTORY;
     private final String EXTENSION = ".ser";
 
-    public FileChannelService() {
-        this.DIRECTORY = Paths.get(System.getProperty("user.dir"), "file-data-map", Channel.class.getSimpleName());
+    public FileReadStatusRepository() {
+        this.DIRECTORY = Paths.get(System.getProperty("user.dir"), "file-data-map", ReadStatus.class.getSimpleName());
         if (Files.notExists(DIRECTORY)) {
             try {
                 Files.createDirectories(DIRECTORY);
@@ -33,41 +33,40 @@ public class FileChannelService implements ChannelService {
         return DIRECTORY.resolve(id + EXTENSION);
     }
 
-    private void saveToFile(Channel channel) {
-        Path path = resolvePath(channel.getId());
+    private void saveToFile(ReadStatus readStatus) {
+        Path path = resolvePath(readStatus.getId());
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(path.toFile()))) {
-            oos.writeObject(channel);
+            oos.writeObject(readStatus);
         } catch (IOException e) {
             throw new RuntimeException("Failed to save file: " + path, e);
         }
     }
 
-    private Channel loadFromFile(Path path) {
+    private ReadStatus loadFromFile(Path path) {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path.toFile()))) {
-            return (Channel) ois.readObject();
+            return (ReadStatus) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException("Failed to read file: " + path, e);
         }
     }
 
     @Override
-    public Channel create(ChannelType type, String name, String description, List<UUID> memberIds) {
-        Channel channel = new Channel(type, name, description, memberIds);
-        saveToFile(channel);
-        return channel;
+    public ReadStatus save(ReadStatus readStatus) {
+        saveToFile(readStatus);
+        return readStatus;
     }
 
     @Override
-    public Channel findById(UUID id) {
+    public Optional<ReadStatus> findById(UUID id) {
         Path path = resolvePath(id);
         if (Files.notExists(path)) {
-            throw new NoSuchElementException("Channel with id " + id + " not found");
+            return Optional.empty();
         }
-        return loadFromFile(path);
+        return Optional.of(loadFromFile(path));
     }
 
     @Override
-    public List<Channel> findAll() {
+    public List<ReadStatus> findAll() {
         try (var pathStream = Files.list(DIRECTORY)) {
             return pathStream
                     .filter(path -> path.toString().endsWith(EXTENSION))
@@ -79,22 +78,17 @@ public class FileChannelService implements ChannelService {
     }
 
     @Override
-    public Channel update(UUID id, ChannelType type, String name, String description, List<UUID> memberIds) {
-        Channel channel = findById(id);
-        channel.update(type, name, description, memberIds);
-        saveToFile(channel);
-        return channel;
+    public boolean existsById(UUID id) {
+        return Files.exists(resolvePath(id));
     }
 
     @Override
-    public void delete(UUID id) {
-        findById(id);
+    public void deleteById(UUID id) {
         Path path = resolvePath(id);
-
         try {
-            Files.delete(path);
+            Files.deleteIfExists(path);
         } catch (IOException e) {
             throw new RuntimeException("Failed to delete file: " + path, e);
         }
     }
-}*/
+}
