@@ -1,24 +1,20 @@
 package com.sprint.mission.discodeit.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.util.List;
 import java.util.UUID;
 
 @Getter
+@Builder
+@AllArgsConstructor
 public class Channel extends BaseEntity {
     private ChannelType type;
     private String name;
     private String description;
     private List<UUID> memberIds;
-
-    public Channel(ChannelType type, String name, String description, List<UUID> memberIds) {
-        super();
-        this.type = type;
-        this.name = name;
-        this.description = description;
-        this.memberIds = memberIds;
-    }
 
     public void update(ChannelType newType, String newName, String newDescription, List<UUID> newMemberIds) {
         boolean anyValueUpdated = false;

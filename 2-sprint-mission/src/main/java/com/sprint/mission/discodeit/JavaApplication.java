@@ -45,10 +45,12 @@ public class JavaApplication {
         MessageRepository messageRepository = new FileMessageRepository();
         UserStatusRepository userStatusRepository = new FileUserStatusRepository();
 
-        // 서비스 초기화
+       /*
+       // 서비스 초기화
         UserService userService = new BasicUserService(userRepository, userStatusRepository);
         ChannelService channelService = new BasicChannelService(channelRepository);
         MessageService messageService = new BasicMessageService(messageRepository, channelRepository, userRepository);
+        */
 
         /*
         // 셋업 및 테스트

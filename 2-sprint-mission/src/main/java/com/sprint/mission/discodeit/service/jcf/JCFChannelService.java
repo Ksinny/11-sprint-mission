@@ -1,3 +1,4 @@
+/*
 package com.sprint.mission.discodeit.service.jcf;
 
 import com.sprint.mission.discodeit.entity.Channel;
@@ -49,4 +50,4 @@ public class JCFChannelService implements ChannelService {
         findById(id);
         data.remove(id);
     }
-}
+}*/
