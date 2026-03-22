@@ -106,9 +106,22 @@ public class BasicChannelService implements ChannelService {
 
     @Override
     public void delete(UUID id) {
-        if (!channelRepository.existsById(id)) {
-            throw new NoSuchElementException("Channel with id " + id + " not found");
-        }
+        Channel channel = channelRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Channel not found with id " + id));
+
+        // 채널 내 메시지 삭제
+        messageRepository.findAll().stream()
+                .filter(m -> m.getChannelId().equals(id))
+                .toList()
+                .forEach(m -> messageRepository.deleteById(m.getId()));
+
+        // 채널 내 ReadStatus 삭제
+        readStatusRepository.findAll().stream()
+                .filter(rs -> rs.getChannelId().equals(id))
+                .toList()
+                .forEach(rs -> readStatusRepository.deleteById(rs.getId()));
+
+
         channelRepository.deleteById(id);
     }
 }
