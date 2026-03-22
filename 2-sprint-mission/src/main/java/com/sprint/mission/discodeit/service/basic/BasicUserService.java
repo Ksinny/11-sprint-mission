@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.dto.UserDto;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.UserService;
@@ -18,6 +19,7 @@ import java.util.UUID;
 public class BasicUserService implements UserService {
     private final UserRepository userRepository;
     private final UserStatusRepository userStatusRepository;
+    private final BinaryContentRepository binaryContentRepository;
 
 
     @Override
@@ -92,9 +94,17 @@ public class BasicUserService implements UserService {
 
     @Override
     public void delete(UUID id) {
-        if (!userRepository.existsById(id)) {
-            throw new NoSuchElementException("User with id " + id + " not found");
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("User with id " + id + " not found"));
+
+
+        userStatusRepository.deleteById(id);
+
+        // 프로필 이미지 삭제 (존재 시)
+        if (user.getProfileImageId() != null) {
+            binaryContentRepository.deleteById(user.getProfileImageId());
         }
+
         userRepository.deleteById(id);
     }
 }
