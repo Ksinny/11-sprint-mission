@@ -1,15 +1,15 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.ChannelDto;
-import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.ChannelType;
-import com.sprint.mission.discodeit.entity.ReadStatus;
+import com.sprint.mission.discodeit.entity.*;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
+import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -20,12 +20,13 @@ import java.util.UUID;
 public class BasicChannelService implements ChannelService {
     private final ChannelRepository channelRepository;
     private final ReadStatusRepository readStatusRepository;
+    private final MessageRepository messageRepository;
 
     @Override
     public ChannelDto.Response createPublicChannel(ChannelDto.CreatePublicRequest request) {
         Channel channel = request.toEntity();
         channelRepository.save(channel);
-        return ChannelDto.Response.of(channel);
+        return ChannelDto.Response.of(channel, null, null);
     }
 
     @Override
@@ -44,25 +45,57 @@ public class BasicChannelService implements ChannelService {
             });
         }
 
-        return ChannelDto.Response.of(channel);
+        return ChannelDto.Response.of(channel, null, request.memberIds());
+    }
+
+    // 공통 로직
+    private ChannelDto.Response toResponse(Channel channel) {
+        // 가장 최신 메시지
+        Instant lastMessageAt = messageRepository.findAll().stream()
+                .filter(m -> m.getChannelId().equals(channel.getId()))
+                .map(BaseEntity::getCreatedAt)
+                .max(Instant::compareTo)
+                .orElse(null);
+
+        // 채널 참여 멤버 목록
+        List<UUID> userIds = null;
+        if (channel.getType() == ChannelType.PRIVATE) {
+            userIds = readStatusRepository.findAll().stream()
+                    .filter(rs -> rs.getChannelId().equals(channel.getId()))
+                    .map(ReadStatus::getUserId)
+                    .toList();
+        }
+
+        return ChannelDto.Response.of(channel, lastMessageAt, userIds);
     }
 
     @Override
-    public Channel findById(UUID id) {
-        return channelRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Channel with id " + id + " not found"));
+    public ChannelDto.Response findById(UUID id) {
+        Channel channel = channelRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Channel not found with id " + id));
+
+        return toResponse(channel);
     }
 
     @Override
-    public List<Channel> findAll() {
-        return channelRepository.findAll();
+    public List<ChannelDto.Response> findAllByUserId(UUID userId) {
+        List<UUID> myChannelIds = readStatusRepository.findAll().stream()
+                .filter(rs -> rs.getUserId().equals(userId))
+                .map(ReadStatus::getChannelId)
+                .toList();
+
+        return channelRepository.findAll().stream()
+                .filter(channel -> channel.getType() == ChannelType.PUBLIC || myChannelIds.contains(channel.getId()))
+                .map(this::toResponse)
+                .toList();
     }
 
     @Override
     public Channel update(UUID id, ChannelType type, String name, String description, List<UUID> memberIds) {
-        Channel channel = findById(id);
-        channel.update(type, name, description, memberIds);
-        return channelRepository.save(channel);
+//        Channel channel = findById(id);
+//        channel.update(type, name, description, memberIds);
+//        return channelRepository.save(channel);
+        return null;
     }
 
     @Override
