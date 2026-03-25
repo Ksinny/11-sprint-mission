@@ -20,7 +20,7 @@ public class UserStatusDto {
     }
 
     public record UpdateRequest(
-        Instant LastActiveAt
+        Instant lastActiveAt
     ) {}
 
     @Builder

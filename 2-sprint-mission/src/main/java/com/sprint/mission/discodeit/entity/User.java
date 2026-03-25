@@ -10,7 +10,7 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 public class User extends BaseEntity {
-    private String userName;
+    private String username;
     private String nickname;
     private String description;
     private String email;
@@ -19,11 +19,11 @@ public class User extends BaseEntity {
 
 
 
-    public void update(String newUserName, String newNickname, String newDescription, String newEmail, String newPassword) {
+    public void update(String newUsername, String newNickname, String newDescription, String newEmail, String newPassword) {
         boolean anyValueUpdated = false;
 
-        if (newUserName != null && !newUserName.equals(this.userName)) {
-            this.userName = newUserName;
+        if (newUsername != null && !newUsername.equals(this.username)) {
+            this.username = newUsername;
             anyValueUpdated = true;
         }
         if (newNickname != null && !newNickname.equals(this.nickname)) {
@@ -60,11 +60,11 @@ public class User extends BaseEntity {
     public String toString() {
         return "사용자 [" +
                 "UUID: " + getId() +
-                "\n이름: " + getUserName() +
+                "\n이름: " + getUsername() +
                 ", 별명: " + getNickname() +
                 ", 소개: " + getDescription() +
                 ", 이메일: " + getEmail() +
-                ", 비밀번호: " + getPassword() + // 추후 비밀번호 관련 로직 변경 예정
+ //               ", 비밀번호: " + getPassword() + // 추후 비밀번호 관련 로직 변경 예정 + 제외
                 ", 프로필 사진: " + getProfileImageId() +
                 ", 생성 시간: " + getCreatedAt() +
                 ", 수정 시간: " + getUpdatedAt() +

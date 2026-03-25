@@ -11,21 +11,21 @@ public class UserDto {
 
     @Builder
     public record CreateRequest(
-            String userName,
-            String password,
-            String email,
+            String username,
             String nickname,
             String description,
+            String email,
+            String password,
             UUID profileImageId // 선택적으로 프로필 이미지 등록
     ) {
         // DTO -> Entity
         public User toEntity() {
             return User.builder()
-                    .userName(this.userName)
-                    .password(this.password)
-                    .email(this.email)
+                    .username(this.username)
                     .nickname(this.nickname)
                     .description(this.description)
+                    .email(this.email)
+                    .password(this.password)
                     .profileImageId(this.profileImageId)
                     .build();
         }
@@ -44,11 +44,11 @@ public class UserDto {
     public record Response(
             UUID id,
             String username,
-            String nickname,    // 추가
+            String nickname,
+            String description,
             String email,
-            String description, // 추가
-            UUID profileImageId, // 추가
-            boolean isOnline,   // 핵심!
+            UUID profileImageId,
+            boolean isOnline,
             Instant lastActivityAt // 추가
     ) {
 
@@ -56,10 +56,10 @@ public class UserDto {
         public static Response of(User user, UserStatus status) {
             return Response.builder()
                     .id(user.getId())
-                    .username(user.getUserName())
+                    .username(user.getUsername())
                     .nickname(user.getNickname())
-                    .email(user.getEmail())
                     .description(user.getDescription())
+                    .email(user.getEmail())
                     .profileImageId(user.getProfileImageId())
                     .isOnline(status.isOnline())
                     .lastActivityAt(status.getLastActiveAt())

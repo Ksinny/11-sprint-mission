@@ -61,7 +61,7 @@ public class BasicUserStatusService implements UserStatusService {
     }
 
     @Override
-    public UserStatusDto.Response updateByUserId(UUID userId, UserStatusDto.UpdateRequest request) {
+    public UserStatusDto.Response updateByUserId(UUID userId) {
         UserStatus userStatus = userStatusRepository.findAll().stream()
                 .filter(us -> us.getUserId().equals(userId))
                 .findFirst()

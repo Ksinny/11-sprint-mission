@@ -25,8 +25,8 @@ public class BasicUserService implements UserService {
     @Override
     public UserDto.Response create(UserDto.CreateRequest request) {
         // username 중복 확인
-        if (userRepository.existsByName(request.userName())) {
-            throw new IllegalArgumentException("User with name " + request.userName() + " already exists");
+        if (userRepository.existsByName(request.username())) {
+            throw new IllegalArgumentException("User with name " + request.username() + " already exists");
         }
 
         // email 중복 확인
