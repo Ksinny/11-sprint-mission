@@ -26,7 +26,8 @@ public class BasicChannelService implements ChannelService {
     public ChannelDto.Response createPublicChannel(ChannelDto.CreatePublicRequest request) {
         Channel channel = request.toEntity();
         channelRepository.save(channel);
-        return ChannelDto.Response.of(channel, null, null);
+
+        return toResponse(channel);
     }
 
     @Override
@@ -35,8 +36,8 @@ public class BasicChannelService implements ChannelService {
         channelRepository.save(channel);
 
         // 채널 참여자 ReadStatus 생성
-        if (request.memberIds() != null) {
-            request.memberIds().forEach(userId -> {
+        if (channel.getMemberIds() != null) {
+            channel.getMemberIds().forEach(userId -> {
                 ReadStatus readStatus = ReadStatus.builder()
                         .userId(userId)
                         .channelId(channel.getId())
@@ -45,7 +46,7 @@ public class BasicChannelService implements ChannelService {
             });
         }
 
-        return ChannelDto.Response.of(channel, null, request.memberIds());
+        return toResponse(channel);
     }
 
     // 공통 로직
@@ -58,13 +59,9 @@ public class BasicChannelService implements ChannelService {
                 .orElse(null);
 
         // 채널 참여 멤버 목록
-        List<UUID> userIds = null;
-        if (channel.getType() == ChannelType.PRIVATE) {
-            userIds = readStatusRepository.findAll().stream()
-                    .filter(rs -> rs.getChannelId().equals(channel.getId()))
-                    .map(ReadStatus::getUserId)
-                    .toList();
-        }
+        List<UUID> userIds = (channel.getType() == ChannelType.PRIVATE)
+                    ? channel.getMemberIds()
+                    : null;
 
         return ChannelDto.Response.of(channel, lastMessageAt, userIds);
     }

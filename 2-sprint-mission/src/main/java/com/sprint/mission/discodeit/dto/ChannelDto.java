@@ -16,25 +16,21 @@ public class ChannelDto {
         String description
     ) {
         // DTO -> Entity
+        // 엔티티의 정적 팩토리 메서드 호출
         public Channel toEntity() {
-            return Channel.builder()
-                    .name(this.name)
-                    .description(this.description)
-                    .type(ChannelType.PUBLIC)
-                    .build();
+            return Channel.createPublic(this.name, this.description);
         }
 
     }
 
     // PRIVATE 채널 생성
     public record CreatePrivateRequest(
-        List<UUID> memberIds // 참여 유저 ID 목록 (name, description은 생략)
+        List<UUID> memberIds
     ) {
         // DTO -> Entity
+        // 엔티티의 정적 팩토리 메서드 호출
         public Channel toEntity() {
-            return Channel.builder()
-                    .type(ChannelType.PRIVATE)
-                    .build();
+            return Channel.createPrivate(this.memberIds);
         }
     }
 
@@ -52,7 +48,7 @@ public class ChannelDto {
             Instant lastMessageAt,
             List<UUID> userIds
     ) {
-        // 엔티티와 외부 데이터를 조합하여 Response를 만드는 정적 팩토리 메서드
+        // Entity -> DTO
         public static Response of(Channel channel, Instant lastMessageAt, List<UUID> userIds) {
             return Response.builder()
                     .id(channel.getId())
