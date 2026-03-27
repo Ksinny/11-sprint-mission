@@ -22,16 +22,13 @@ public class BasicAuthService implements AuthService {
     @Override
     public UserDto.Response login(AuthDto.LoginRequest request) {
         User user = userRepository.findByName(request.username())
-                .orElseThrow(() -> new NoSuchElementException("Invalid username or password"));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));;
 
-        // 비밀번호 암호화 미구현
-        if (!user.getPassword().equals(request.password())) {
-            throw new NoSuchElementException("Invalid username or password");
-        }
+        // 비밀번호 검증
+        user.validatePassword(request.password());
 
-                UserStatus userStatus = userStatusRepository.findByUserId(user.getId())
+        UserStatus userStatus = userStatusRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new NoSuchElementException("User status information not found"));
-
 
         return UserDto.Response.of(user, userStatus);
     }

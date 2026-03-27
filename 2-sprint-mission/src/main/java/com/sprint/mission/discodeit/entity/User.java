@@ -56,6 +56,14 @@ public class User extends BaseEntity {
         super.timeUpdate();
     }
 
+    // 비밀번호 검증
+    // 비밀번호 암호화는 Spring Security의 PasswordEncoder로 스프린트 미션에 맞추어 이후 진행 예정
+    public void validatePassword(String password) {
+        if (this.password == null || !this.password.equals(password)) {
+            throw new IllegalArgumentException("Invalid username or password");
+        }
+    }
+
     @Override
     public String toString() {
         return "사용자 [" +
