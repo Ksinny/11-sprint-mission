@@ -12,16 +12,15 @@ public class MessageDto {
     public record CreateRequest(
             UUID authorId,
             UUID channelId,
-            String content,
-            List<UUID> attachmentIds // 선택적으로 첨부파일 추가
+            String content
     ) {
         // DTO -> Entity
-        public Message toEntity() {
+        public Message toEntity(List<UUID> attachmentIds) {
             return Message.builder()
                     .authorId(this.authorId)
                     .channelId(this.channelId)
                     .content(this.content)
-                    .attachmentIds(this.attachmentIds != null ? new ArrayList<>(this.attachmentIds) : new ArrayList<>())
+                    .attachmentIds(attachmentIds != null ? new ArrayList<>(attachmentIds) : new ArrayList<>())
                     .build();
         }
     }

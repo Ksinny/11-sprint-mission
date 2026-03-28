@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public class BinaryContentDto {
 
+    @Builder
     public record CreateRequest(
             String fileName,
             Long size,
@@ -20,7 +21,7 @@ public class BinaryContentDto {
                     .id(UUID.randomUUID())
                     .createdAt(Instant.now())
                     .fileName(this.fileName)
-                    .size(this.size)
+                    .size((long) this.bytes.length)
                     .contentType(this.contentType)
                     .bytes(this.bytes)
                     .build();
