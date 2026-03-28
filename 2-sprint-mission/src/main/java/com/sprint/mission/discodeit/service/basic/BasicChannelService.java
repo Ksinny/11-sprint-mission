@@ -1,7 +1,12 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.ChannelDto;
-import com.sprint.mission.discodeit.entity.*;
+import com.sprint.mission.discodeit.entity.BaseEntity;
+import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.ChannelType;
+import com.sprint.mission.discodeit.entity.ReadStatus;
+import com.sprint.mission.discodeit.exception.BusinessException;
+import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
@@ -11,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 
@@ -69,7 +73,7 @@ public class BasicChannelService implements ChannelService {
     @Override
     public ChannelDto.Response findById(UUID id) {
         Channel channel = channelRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Channel not found with id " + id));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CHANNEL_NOT_FOUND));
 
         return toResponse(channel);
     }
@@ -90,11 +94,11 @@ public class BasicChannelService implements ChannelService {
     @Override
     public ChannelDto.Response update(UUID id, ChannelDto.UpdateRequest request) {
         Channel channel = channelRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Channel not found with id " + id));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CHANNEL_NOT_FOUND));
 
 
         if (channel.getType() == ChannelType.PRIVATE) {
-            throw new IllegalStateException("PRIVATE channels cannot be updated.");
+            throw new BusinessException(ErrorCode.PRIVATE_CHANNEL_UPDATE_NOT_ALLOWED);
         }
 
         channel.update(request.name(), request.description());
@@ -104,7 +108,7 @@ public class BasicChannelService implements ChannelService {
     @Override
     public void delete(UUID id) {
         Channel channel = channelRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Channel not found with id " + id));
+                .orElseThrow(() -> new BusinessException(ErrorCode.CHANNEL_NOT_FOUND));
 
         // 채널 내 메시지 삭제
         messageRepository.findAll().stream()

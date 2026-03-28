@@ -3,6 +3,8 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.dto.UserDto;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
+import com.sprint.mission.discodeit.exception.BusinessException;
+import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
@@ -11,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @Service
@@ -26,12 +27,12 @@ public class BasicUserService implements UserService {
     public UserDto.Response create(UserDto.CreateRequest request) {
         // username 중복 확인
         if (userRepository.existsByName(request.username())) {
-            throw new IllegalArgumentException("User with name " + request.username() + " already exists");
+            throw new BusinessException(ErrorCode.DUPLICATE_NAME);
         }
 
         // email 중복 확인
         if (userRepository.existsByEmail(request.email())) {
-            throw new IllegalArgumentException("User with email " + request.email() + " already exists");
+            throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);
         }
 
         // toEntity()로 유저 등록
@@ -48,10 +49,10 @@ public class BasicUserService implements UserService {
     @Override
     public UserDto.Response findById(UUID id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("User with id " + id + " not found"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         UserStatus userStatus = userStatusRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("UserStatus with id " + id + " not found"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_STATUS_NOT_FOUND));
 
         return UserDto.Response.of(user, userStatus);
     }
@@ -72,7 +73,7 @@ public class BasicUserService implements UserService {
     @Override
     public UserDto.Response update(UUID id, UserDto.UpdateRequest request) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("User with id " + id + " not found"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         user.update(
                 request.username(),
@@ -95,7 +96,7 @@ public class BasicUserService implements UserService {
     @Override
     public void delete(UUID id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("User with id " + id + " not found"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
 
         userStatusRepository.deleteById(id);
