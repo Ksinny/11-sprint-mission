@@ -15,18 +15,17 @@ public class UserDto {
             String nickname,
             String description,
             String email,
-            String password,
-            UUID profileImageId // 선택적으로 프로필 이미지 등록
+            String password
     ) {
         // DTO -> Entity
-        public User toEntity() {
+        public User toEntity(UUID profileImageId) {
             return User.builder()
                     .username(this.username)
                     .nickname(this.nickname)
                     .description(this.description)
                     .email(this.email)
                     .password(this.password)
-                    .profileImageId(this.profileImageId)
+                    .profileImageId(profileImageId)
                     .build();
         }
     }

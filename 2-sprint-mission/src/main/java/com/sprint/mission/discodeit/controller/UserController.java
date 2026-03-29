@@ -1,14 +1,20 @@
 package com.sprint.mission.discodeit.controller;
 
+import com.sprint.mission.discodeit.dto.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.UserDto;
 import com.sprint.mission.discodeit.dto.UserStatusDto;
+import com.sprint.mission.discodeit.exception.BusinessException;
+import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.UserStatusService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,18 +26,24 @@ public class UserController {
     private final UserService userService;
     private final UserStatusService userStatusService;
 
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserDto.Response> create(
-            @RequestBody UserDto.CreateRequest request) {
-        UserDto.Response response = userService.create(request);
+            @RequestPart("request") UserDto.CreateRequest request,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+        BinaryContentDto.CreateRequest profileImageRequest = convertToProfileImageDto(profileImage);
+
+        UserDto.Response response = userService.create(request, profileImageRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+    @RequestMapping(value = "/{id}", method = RequestMethod.PUT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserDto.Response> update(
             @PathVariable UUID id,
-            @RequestBody UserDto.UpdateRequest request) {
-        UserDto.Response response = userService.update(id, request);
+            @RequestPart("request")  UserDto.UpdateRequest request,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+        BinaryContentDto.CreateRequest profileImageRequest = convertToProfileImageDto(profileImage);
+
+        UserDto.Response response = userService.update(id, request, profileImageRequest);
         return ResponseEntity.ok(response);
     }
 
@@ -54,5 +66,22 @@ public class UserController {
 
         UserStatusDto.Response response = userStatusService.updateByUserId(id);
         return ResponseEntity.ok(response);
+    }
+
+    // 파일을 DTO 형태로 변환
+    private BinaryContentDto.CreateRequest convertToProfileImageDto(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+        try {
+            return BinaryContentDto.CreateRequest.builder()
+                    .fileName(file.getOriginalFilename())
+                    .size(file.getSize())
+                    .contentType(file.getContentType())
+                    .bytes(file.getBytes())
+                    .build();
+        } catch (IOException e) {
+            throw new BusinessException(ErrorCode.FILE_READ_FAILED);
+        }
     }
 }

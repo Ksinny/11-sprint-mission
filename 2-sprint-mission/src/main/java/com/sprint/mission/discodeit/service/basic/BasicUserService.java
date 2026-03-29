@@ -1,6 +1,8 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.UserDto;
+import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.exception.BusinessException;
@@ -24,7 +26,7 @@ public class BasicUserService implements UserService {
 
 
     @Override
-    public UserDto.Response create(UserDto.CreateRequest request) {
+    public UserDto.Response create(UserDto.CreateRequest request, BinaryContentDto.CreateRequest profileImageRequest) {
         // username 중복 확인
         if (userRepository.existsByName(request.username())) {
             throw new BusinessException(ErrorCode.DUPLICATE_NAME);
@@ -35,8 +37,14 @@ public class BasicUserService implements UserService {
             throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);
         }
 
-        // toEntity()로 유저 등록
-        User user = request.toEntity();
+        UUID profileImageId = null;
+        if (profileImageRequest != null) {
+            BinaryContent binaryContent = profileImageRequest.toEntity();
+            BinaryContent savedContent = binaryContentRepository.save(binaryContent);
+            profileImageId = savedContent.getId();
+        }
+
+        User user = request.toEntity(profileImageId);
         userRepository.save(user);
 
         // UserStatus 함께 생성
@@ -71,9 +79,20 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public UserDto.Response update(UUID id, UserDto.UpdateRequest request) {
+    public UserDto.Response update(UUID id, UserDto.UpdateRequest request, BinaryContentDto.CreateRequest profileImageRequest) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        // 프로필 이미지 변경 로직
+        if (profileImageRequest != null) {
+            // 기존 프로필 이미지 삭제
+            if (user.getProfileImageId() != null) {
+                binaryContentRepository.deleteById(user.getProfileImageId());
+            }
+
+            BinaryContent newImage = profileImageRequest.toEntity();
+            user.updateProfileImage(binaryContentRepository.save(newImage).getId());
+        }
 
         user.update(
                 request.username(),
@@ -82,7 +101,6 @@ public class BasicUserService implements UserService {
                 request.email(),
                 request.password()
         );
-        user.updateProfileImage(request.profileImageId());
 
         userRepository.save(user);
 
