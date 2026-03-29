@@ -71,8 +71,12 @@ public class BasicUserService implements UserService {
 
         return users.stream()
                 .map(user -> {
-                    UserStatus status = userStatusRepository.findById(user.getId())
-                            .orElseGet(() -> new UserStatus(user.getId()));
+                    UserStatus status = userStatusRepository.findByUserId(user.getId())
+                            .orElseGet(() -> UserStatus.builder()
+                                    .userId(user.getId())
+                                    .lastActiveAt(user.getCreatedAt())
+                                    .build());
+
                     return UserDto.Response.of(user, status);
                 })
                 .toList();

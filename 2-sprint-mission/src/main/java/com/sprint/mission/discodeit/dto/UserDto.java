@@ -73,26 +73,24 @@ public class UserDto {
     @Builder
     public record Response(
             UUID id,
+            Instant createdAt,
+            Instant updatedAt,
             String username,
-            String nickname,
-            String description,
             String email,
-            UUID profileImageId,
-            boolean isOnline,
-            Instant lastActivityAt // 추가
+            UUID profileId,
+            Boolean online
     ) {
 
         // Entity -> DTO
         public static Response of(User user, UserStatus status) {
             return Response.builder()
                     .id(user.getId())
+                    .createdAt(user.getCreatedAt())
+                    .updatedAt(user.getUpdatedAt())
                     .username(user.getUsername())
-                    .nickname(user.getNickname())
-                    .description(user.getDescription())
                     .email(user.getEmail())
-                    .profileImageId(user.getProfileImageId())
-                    .isOnline(status.isOnline())
-                    .lastActivityAt(status.getLastActiveAt())
+                    .profileId(user.getProfileImageId())
+                    .online(status.isOnline())
                     .build();
         }
     }
