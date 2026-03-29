@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.dto.MessageDto;
 import com.sprint.mission.discodeit.exception.BusinessException;
 import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.service.MessageService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,7 +25,7 @@ public class MessageController {
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MessageDto.Response> create(
-            @RequestPart("request") MessageDto.CreateRequest request,
+            @Valid @RequestPart("request") MessageDto.CreateRequest request,
             @RequestPart(value = "attachments", required = false) List<MultipartFile> attachments) {
         List<BinaryContentDto.CreateRequest> fileRequests = convertToFileDtos(attachments);
         MessageDto.Response response = messageService.create(request, fileRequests);
@@ -34,7 +35,7 @@ public class MessageController {
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public ResponseEntity<MessageDto.Response> update(
             @PathVariable UUID id,
-            @RequestBody MessageDto.UpdateRequest request) {
+            @Valid @RequestBody MessageDto.UpdateRequest request) {
         MessageDto.Response response = messageService.update(id, request);
         return ResponseEntity.ok(response);
     }

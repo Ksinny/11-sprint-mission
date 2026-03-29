@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.controller;
 import com.sprint.mission.discodeit.dto.AuthDto;
 import com.sprint.mission.discodeit.dto.UserDto;
 import com.sprint.mission.discodeit.service.basic.BasicAuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,7 +20,7 @@ public class AuthController {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ResponseEntity<UserDto.Response> login(
-            @RequestBody AuthDto.LoginRequest request
+            @Valid @RequestBody AuthDto.LoginRequest request
     ) {
         UserDto.Response response = basicAuthService.login(request);
         return ResponseEntity.ok(response);

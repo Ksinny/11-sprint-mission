@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.dto.ChannelDto;
 import com.sprint.mission.discodeit.service.ChannelService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,14 +20,14 @@ public class ChannelController {
 
     @RequestMapping(value = "/public", method = RequestMethod.POST)
     public ResponseEntity<ChannelDto.Response> create(
-            @RequestBody ChannelDto.CreatePublicRequest request) {
+            @Valid @RequestBody ChannelDto.CreatePublicRequest request) {
         ChannelDto.Response response = channelService.createPublicChannel(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @RequestMapping(value = "/private", method = RequestMethod.POST)
         public ResponseEntity<ChannelDto.Response> create(
-                @RequestBody ChannelDto.CreatePrivateRequest request) {
+            @Valid @RequestBody ChannelDto.CreatePrivateRequest request) {
             ChannelDto.Response response = channelService.createPrivateChannel(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         }
@@ -34,7 +35,7 @@ public class ChannelController {
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
     public ResponseEntity<ChannelDto.Response> update(
             @PathVariable UUID id,
-            @RequestBody ChannelDto.UpdateRequest request) {
+            @Valid @RequestBody ChannelDto.UpdateRequest request) {
         ChannelDto.Response response = channelService.update(id, request);
         return ResponseEntity.ok(response);
     }

@@ -10,6 +10,10 @@ public enum ErrorCode {
 
     /// ==== Common ====
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON-001", "서버 내부 오류가 발생했습니다."),
+    INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "COMMON-002", "잘못된 입력값입니다."),
+    METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "COMMON-003", "지원하지 않는 HTTP 메서드입니다."),
+    API_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMON-004", "요청하신 API 주소를 찾을 수 없습니다."),
+    INVALID_TYPE_VALUE(HttpStatus.BAD_REQUEST, "COMMON-005", "입력값의 타입이 올바르지 않습니다."),
 
     // ==== User ====
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER-001", "존재하지 않는 유저입니다."),

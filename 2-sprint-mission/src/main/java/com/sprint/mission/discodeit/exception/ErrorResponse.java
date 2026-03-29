@@ -14,6 +14,11 @@ public record ErrorResponse(
         return new ErrorResponse(errorCode.getCode(), errorCode.getMessage(), new ArrayList<>());
     }
 
+    // 유효성 검사용
+    public static ErrorResponse of(ErrorCode errorCode, BindingResult bindingResult) {
+        return new ErrorResponse(errorCode.getCode(), errorCode.getMessage(), FieldError.of(bindingResult));
+    }
+
     public record FieldError(
             String field,
             String value,

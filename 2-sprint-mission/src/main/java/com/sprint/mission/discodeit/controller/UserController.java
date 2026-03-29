@@ -7,6 +7,7 @@ import com.sprint.mission.discodeit.exception.BusinessException;
 import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.UserStatusService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,7 +29,7 @@ public class UserController {
 
     @RequestMapping(method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserDto.Response> create(
-            @RequestPart("request") UserDto.CreateRequest request,
+            @Valid @RequestPart("request") UserDto.CreateRequest request,
             @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
         BinaryContentDto.CreateRequest profileImageRequest = convertToProfileImageDto(profileImage);
 
@@ -39,7 +40,7 @@ public class UserController {
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserDto.Response> update(
             @PathVariable UUID id,
-            @RequestPart("request")  UserDto.UpdateRequest request,
+            @Valid @RequestPart("request")  UserDto.UpdateRequest request,
             @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
         BinaryContentDto.CreateRequest profileImageRequest = convertToProfileImageDto(profileImage);
 
