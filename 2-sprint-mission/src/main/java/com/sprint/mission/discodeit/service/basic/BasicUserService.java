@@ -120,6 +120,8 @@ public class BasicUserService implements UserService {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
+    userStatusRepository.deleteByUserId(id);
+    
     // 프로필 이미지 삭제 (존재 시)
     if (user.getProfileImageId() != null) {
       binaryContentRepository.deleteById(user.getProfileImageId());
