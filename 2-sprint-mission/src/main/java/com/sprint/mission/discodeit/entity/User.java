@@ -12,40 +12,27 @@ import java.util.UUID;
 public class User extends BaseEntity {
 
   private String username;
-  private String nickname;
-  private String description;
+  //  미사용 필드 주석처리
+//  private String nickname;
+//  private String description;
   private String email;
   private String password;
   private UUID profileImageId;
 
 
-  public void update(String newUsername, String newEmail, String newPassword) {
-    boolean anyValueUpdated = false;
+  public void changeUsername(String newUsername) {
+    this.username = newUsername;
+    this.timeUpdate();
+  }
 
-    if (newUsername != null && !newUsername.equals(this.username)) {
-      this.username = newUsername;
-      anyValueUpdated = true;
-    }
-        /*if (newNickname != null && !newNickname.equals(this.nickname)) {
-            this.nickname = newNickname;
-            anyValueUpdated = true;
-        }
-        if (newDescription != null && !newDescription.equals(this.description)) {
-            this.description = newDescription;
-            anyValueUpdated = true;
-        }*/
-    if (newEmail != null && !newEmail.equals(this.email)) {
-      this.email = newEmail;
-      anyValueUpdated = true;
-    }
-    if (newPassword != null && !newPassword.equals(this.password)) {
-      this.password = newPassword;
-      anyValueUpdated = true;
-    }
+  public void changeEmail(String newEmail) {
+    this.email = newEmail;
+    this.timeUpdate();
+  }
 
-    if (anyValueUpdated) {
-      super.timeUpdate();
-    }
+  public void changePassword(String newPassword) {
+    this.password = newPassword;
+    this.timeUpdate();
   }
 
   // 프로필 이미지 수정
@@ -69,8 +56,6 @@ public class User extends BaseEntity {
     return "사용자 [" +
         "UUID: " + getId() +
         "\n이름: " + getUsername() +
-        ", 별명: " + getNickname() +
-        ", 소개: " + getDescription() +
         ", 이메일: " + getEmail() +
         //               ", 비밀번호: " + getPassword() + // 추후 비밀번호 관련 로직 변경 예정 + 제외
         ", 프로필 사진: " + getProfileImageId() +

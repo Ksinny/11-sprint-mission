@@ -95,16 +95,33 @@ public class BasicUserService implements UserService {
       if (user.getProfileImageId() != null) {
         binaryContentRepository.deleteById(user.getProfileImageId());
       }
-
       BinaryContent newImage = profileImageRequest.toEntity();
       user.updateProfileImage(binaryContentRepository.save(newImage).getId());
     }
 
-    user.update(
-        request.newUsername(),
-        request.newEmail(),
-        request.newPassword()
-    );
+    // 사용자명 수정
+    Optional.ofNullable(request.newUsername())
+        .filter(newUsername -> !newUsername.equals(user.getUsername()))
+        .ifPresent(newUsername -> {
+          if (userRepository.existsByName(newUsername)) {
+            throw new BusinessException(ErrorCode.DUPLICATE_NAME);
+          }
+          user.changeUsername(newUsername);
+        });
+
+    // 이메일 수정
+    Optional.ofNullable(request.newEmail())
+        .filter(newEmail -> !newEmail.equals(user.getEmail()))
+        .ifPresent(newEmail -> {
+          if (userRepository.existsByEmail(newEmail)) {
+            throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);
+          }
+          user.changeEmail(newEmail);
+        });
+
+    // 비밀번호 수정
+    Optional.ofNullable(request.newPassword())
+        .ifPresent(user::changePassword);
 
     userRepository.save(user);
 
@@ -121,7 +138,7 @@ public class BasicUserService implements UserService {
         .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
     userStatusRepository.deleteByUserId(id);
-    
+
     // 프로필 이미지 삭제 (존재 시)
     if (user.getProfileImageId() != null) {
       binaryContentRepository.deleteById(user.getProfileImageId());
