@@ -7,9 +7,16 @@ import java.util.List;
 import java.util.UUID;
 
 public interface UserService {
-    UserDto.Response create(UserDto.CreateRequest request, BinaryContentDto.CreateRequest profileImageRequest);
-    UserDto.Response findById(UUID id);
-    List<UserDto.Response> findAll();
-    UserDto.Response update(UUID id, UserDto.UpdateRequest request, BinaryContentDto.CreateRequest profileImageRequest);
-    void delete(UUID id);
+
+  UserDto.Response create(UserDto.CreateRequest request,
+      BinaryContentDto.CreateRequest profileImageRequest);
+
+  UserDto.Response findById(UUID id);
+
+  List<UserDto.Response> findAll();
+
+  UserDto.Response update(UUID id, UserDto.UpdateRequest request,
+      BinaryContentDto.CreateRequest profileImageRequest);
+
+  void delete(UUID id);
 }

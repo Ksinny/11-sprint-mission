@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.MessageDto;
+import com.sprint.mission.discodeit.dto.MessageDto.CreateRequest;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.exception.BusinessException;
@@ -28,7 +29,7 @@ public class BasicMessageService implements MessageService {
 
 
   @Override
-  public MessageDto.Response create(MessageDto.CreateRequest request,
+  public MessageDto.Response create(CreateRequest request,
       List<BinaryContentDto.CreateRequest> fileRequests) {
     if (!channelRepository.existsById(request.channelId())) {
       throw new BusinessException(ErrorCode.CHANNEL_NOT_FOUND);

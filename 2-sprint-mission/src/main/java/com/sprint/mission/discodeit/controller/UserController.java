@@ -31,8 +31,9 @@ public class UserController {
   public ResponseEntity<UserDto.Response> create(
       @Valid @RequestPart("userCreateRequest") UserDto.CreateRequest request,
       @RequestPart(value = "profile", required = false) MultipartFile profileImage) {
-    BinaryContentDto.CreateRequest profileImageRequest = convertToProfileImageDto(profileImage);
 
+    BinaryContentDto.CreateRequest profileImageRequest = BinaryContentDto.CreateRequest.of(
+        profileImage);
     UserDto.Response response = userService.create(request, profileImageRequest);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
@@ -42,8 +43,9 @@ public class UserController {
       @PathVariable UUID userId,
       @Valid @RequestPart("userUpdateRequest") UserDto.UpdateRequest request,
       @RequestPart(value = "profile", required = false) MultipartFile profileImage) {
-    BinaryContentDto.CreateRequest profileImageRequest = convertToProfileImageDto(profileImage);
 
+    BinaryContentDto.CreateRequest profileImageRequest = BinaryContentDto.CreateRequest.of(
+        profileImage);
     UserDto.Response response = userService.update(userId, request, profileImageRequest);
     return ResponseEntity.ok(response);
   }
@@ -68,22 +70,5 @@ public class UserController {
 
     UserStatusDto.Response response = userStatusService.updateByUserId(userId, request);
     return ResponseEntity.ok(response);
-  }
-
-  // 파일을 DTO 형태로 변환
-  private BinaryContentDto.CreateRequest convertToProfileImageDto(MultipartFile file) {
-    if (file == null || file.isEmpty()) {
-      return null;
-    }
-    try {
-      return BinaryContentDto.CreateRequest.builder()
-          .fileName(file.getOriginalFilename())
-          .size(file.getSize())
-          .contentType(file.getContentType())
-          .bytes(file.getBytes())
-          .build();
-    } catch (IOException e) {
-      throw new BusinessException(ErrorCode.FILE_READ_FAILED);
-    }
   }
 }

@@ -27,7 +27,9 @@ public class MessageController {
   public ResponseEntity<MessageDto.Response> create(
       @Valid @RequestPart("messageCreateRequest") MessageDto.CreateRequest request,
       @RequestPart(value = "attachments", required = false) List<MultipartFile> attachments) {
-    List<BinaryContentDto.CreateRequest> fileRequests = convertToFileDtos(attachments);
+
+    List<BinaryContentDto.CreateRequest> fileRequests = BinaryContentDto.CreateRequest.ofList(
+        attachments);
     MessageDto.Response response = messageService.create(request, fileRequests);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
@@ -52,25 +54,5 @@ public class MessageController {
       @RequestParam UUID channelId) {
     List<MessageDto.Response> responseList = messageService.findAllByChannelId(channelId);
     return ResponseEntity.ok(responseList);
-  }
-
-  // 파일을 DTO 형태로 변환
-  private List<BinaryContentDto.CreateRequest> convertToFileDtos(List<MultipartFile> attachments) {
-    return Optional.ofNullable(attachments)
-        .orElse(Collections.emptyList())
-        .stream()
-        .map(file -> {
-          try {
-            return BinaryContentDto.CreateRequest.builder()
-                .fileName(file.getOriginalFilename())
-                .size(file.getSize())
-                .contentType(file.getContentType())
-                .bytes(file.getBytes())
-                .build();
-          } catch (IOException e) {
-            throw new BusinessException(ErrorCode.FILE_READ_FAILED);
-          }
-        })
-        .toList();
   }
 }
