@@ -17,20 +17,20 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class BasicAuthService implements AuthService {
 
-    private final UserRepository userRepository;
-    private final UserStatusRepository userStatusRepository;
+  private final UserRepository userRepository;
+  private final UserStatusRepository userStatusRepository;
 
-    @Override
-    public UserDto.Response login(AuthDto.LoginRequest request) {
-        User user = userRepository.findByName(request.username())
-                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));
+  @Override
+  public UserDto.Response login(AuthDto.LoginRequest request) {
+    User user = userRepository.findByName(request.username())
+        .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));
 
-        // 비밀번호 검증
-        user.validatePassword(request.password());
+    // 비밀번호 검증
+    user.validatePassword(request.password());
 
-        UserStatus userStatus = userStatusRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_STATUS_NOT_FOUND));
+    UserStatus userStatus = userStatusRepository.findByUserId(user.getId())
+        .orElseThrow(() -> new BusinessException(ErrorCode.USER_STATUS_NOT_FOUND));
 
-        return UserDto.Response.of(user, userStatus);
-    }
+    return UserDto.Response.of(user, userStatus);
+  }
 }

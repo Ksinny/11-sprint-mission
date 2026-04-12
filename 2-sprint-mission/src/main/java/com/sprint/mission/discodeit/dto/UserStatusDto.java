@@ -2,10 +2,9 @@ package com.sprint.mission.discodeit.dto;
 
 import com.sprint.mission.discodeit.entity.UserStatus;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
-
 import java.time.Instant;
 import java.util.UUID;
+import lombok.Builder;
 
 public class UserStatusDto {
 

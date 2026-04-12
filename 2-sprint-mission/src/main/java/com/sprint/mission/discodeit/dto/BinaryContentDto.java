@@ -7,14 +7,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import lombok.Builder;
-
-import java.time.Instant;
 import java.util.UUID;
+import lombok.Builder;
 import org.springframework.web.multipart.MultipartFile;
 
 public class BinaryContentDto {

@@ -2,44 +2,47 @@ package com.sprint.mission.discodeit.repository.jcf;
 
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "jcf", matchIfMissing = true)
 public class JCFReadStatusRepository implements ReadStatusRepository {
-    private final Map<UUID, ReadStatus> data;
 
-    public JCFReadStatusRepository() {
-        this.data = new ConcurrentHashMap<>();
-    }
+  private final Map<UUID, ReadStatus> data;
 
-    @Override
-    public ReadStatus save(ReadStatus readStatus) {
-        data.put(readStatus.getId(), readStatus);
-        return readStatus;
-    }
+  public JCFReadStatusRepository() {
+    this.data = new ConcurrentHashMap<>();
+  }
 
-    @Override
-    public Optional<ReadStatus> findById(UUID id) {
-        return Optional.ofNullable(data.get(id));
-    }
+  @Override
+  public ReadStatus save(ReadStatus readStatus) {
+    data.put(readStatus.getId(), readStatus);
+    return readStatus;
+  }
 
-    @Override
-    public List<ReadStatus> findAll() {
-        return data.values().stream().toList();
-    }
+  @Override
+  public Optional<ReadStatus> findById(UUID id) {
+    return Optional.ofNullable(data.get(id));
+  }
 
-    @Override
-    public boolean existsById(UUID id) {
-        return data.containsKey(id);
-    }
+  @Override
+  public List<ReadStatus> findAll() {
+    return data.values().stream().toList();
+  }
 
-    @Override
-    public void deleteById(UUID id) {
-        data.remove(id);
-    }
+  @Override
+  public boolean existsById(UUID id) {
+    return data.containsKey(id);
+  }
+
+  @Override
+  public void deleteById(UUID id) {
+    data.remove(id);
+  }
 }
