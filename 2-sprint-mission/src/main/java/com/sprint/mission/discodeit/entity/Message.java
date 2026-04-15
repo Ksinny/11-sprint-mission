@@ -1,43 +1,42 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-@Builder
-@AllArgsConstructor
-public class Message extends BaseEntity {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Message extends BaseUpdatableEntity {
 
   private String content;
-  private final UUID authorId;
-  private final UUID channelId;
+  private UUID authorId;
+  private UUID channelId;
+  private List<UUID> attachmentIds;
 
-  @Builder.Default // 빈 값으로 빌드
-  private List<UUID> attachmentIds = new ArrayList<>();
 
+  @Builder
+  public Message(String content, UUID authorId, UUID channelId, List<UUID> attachmentIds) {
+    this.content = content;
+    this.authorId = authorId;
+    this.channelId = channelId;
+    this.attachmentIds = attachmentIds != null ? new ArrayList<>(attachmentIds) : new ArrayList<>();
+  }
 
   // 메시지 내용만 수정 가능
   public void update(String newContent) {
-    boolean anyValueUpdated = false;
-
     if (newContent != null && !newContent.equals(this.content)) {
       this.content = newContent;
-      anyValueUpdated = true;
-    }
-
-    if (anyValueUpdated) {
-      super.timeUpdate();
     }
   }
 
   // 첨부파일 추가
   public void addAttachment(UUID attachmentId) {
     this.attachmentIds.add(attachmentId);
-    super.timeUpdate();
   }
 
   @Override

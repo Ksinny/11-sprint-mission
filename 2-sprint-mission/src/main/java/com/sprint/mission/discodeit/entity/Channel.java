@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Channel extends BaseEntity {
+public class Channel extends BaseUpdatableEntity {
 
   private ChannelType type;
   private String name;
@@ -35,19 +36,11 @@ public class Channel extends BaseEntity {
   }
 
   public void update(String newName, String newDescription) {
-    boolean anyValueUpdated = false;
-
     if (newName != null && !newName.equals(this.name)) {
       this.name = newName;
-      anyValueUpdated = true;
     }
     if (newDescription != null && !newDescription.equals(this.description)) {
       this.description = newDescription;
-      anyValueUpdated = true;
-    }
-
-    if (anyValueUpdated) {
-      super.timeUpdate();
     }
   }
 

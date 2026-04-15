@@ -23,7 +23,7 @@ public class ReadStatusDto {
       return ReadStatus.builder()
           .userId(this.userId)
           .channelId(this.channelId)
-          .lastReadAt(this.lastReadAt != null ? this.lastReadAt : Instant.now())
+          .lastReadAt(this.lastReadAt)
           .build();
     }
   }

@@ -65,8 +65,6 @@ public class BinaryContentDto {
     // DTO -> Entity
     public BinaryContent toEntity() {
       return BinaryContent.builder()
-          .id(UUID.randomUUID())
-          .createdAt(Instant.now())
           .fileName(this.fileName)
           .size(this.size)
           .contentType(this.contentType)

@@ -10,13 +10,15 @@ public class UserStatusDto {
 
   public record CreateRequest(
       @NotNull(message = "유저 ID는 필수 항목입니다.")
-      UUID userId
+      UUID userId,
+
+      Instant lastActiveAt
   ) {
 
     public UserStatus toEntity() {
       return UserStatus.builder()
           .userId(this.userId)
-          .lastActiveAt(Instant.now())
+          .lastActiveAt(this.lastActiveAt)
           .build();
     }
   }

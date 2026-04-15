@@ -1,25 +1,25 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import java.time.Instant;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-@Builder
-@AllArgsConstructor
-public class UserStatus extends BaseEntity {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class UserStatus extends BaseUpdatableEntity {
 
-  private final UUID userId;
+  private UUID userId;
   private Instant lastActiveAt;
 
-  public UserStatus(UUID userId) {
-    super();
+  @Builder
+  public UserStatus(UUID userId, Instant lastActiveAt) {
     this.userId = userId;
-    this.lastActiveAt = Instant.now();
+    this.lastActiveAt = lastActiveAt != null ? lastActiveAt : Instant.now();
   }
-
 
   // 온라인 여부 확인 메서드
   public boolean isOnline() {
@@ -30,7 +30,6 @@ public class UserStatus extends BaseEntity {
   public void updateActiveTime(Instant lastActiveAt) {
     if (lastActiveAt != null && !lastActiveAt.equals(this.lastActiveAt)) {
       this.lastActiveAt = lastActiveAt;
-      super.timeUpdate();
     }
   }
 }

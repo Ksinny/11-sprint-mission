@@ -1,14 +1,15 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import java.util.UUID;
-import lombok.AllArgsConstructor;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Builder
 @Getter
-@AllArgsConstructor
-public class User extends BaseEntity {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class User extends BaseUpdatableEntity {
 
   private String username;
   //  미사용 필드 주석처리
@@ -18,20 +19,24 @@ public class User extends BaseEntity {
   private String password;
   private UUID profileImageId;
 
+  @Builder
+  public User(String username, String email, String password, UUID profileImageId) {
+    this.username = username;
+    this.email = email;
+    this.password = password;
+    this.profileImageId = profileImageId;
+  }
 
   public void changeUsername(String newUsername) {
     this.username = newUsername;
-    this.timeUpdate();
   }
 
   public void changeEmail(String newEmail) {
     this.email = newEmail;
-    this.timeUpdate();
   }
 
   public void changePassword(String newPassword) {
     this.password = newPassword;
-    this.timeUpdate();
   }
 
   // 프로필 이미지 수정
@@ -39,7 +44,6 @@ public class User extends BaseEntity {
     if (newProfileImageId != null && !newProfileImageId.equals(this.profileImageId)) {
       this.profileImageId = newProfileImageId;
     }
-    super.timeUpdate();
   }
 
   // 비밀번호 검증
@@ -56,7 +60,7 @@ public class User extends BaseEntity {
         "UUID: " + getId() +
         "\n이름: " + getUsername() +
         ", 이메일: " + getEmail() +
-        //               ", 비밀번호: " + getPassword() + // 추후 비밀번호 관련 로직 변경 예정 + 제외
+        // ", 비밀번호: " + getPassword() + // 추후 비밀번호 관련 로직 변경 예정 + 제외
         ", 프로필 사진: " + getProfileImageId() +
         ", 생성 시간: " + getCreatedAt() +
         ", 수정 시간: " + getUpdatedAt() +

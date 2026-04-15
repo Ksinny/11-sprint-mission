@@ -48,7 +48,10 @@ public class BasicUserService implements UserService {
     userRepository.save(user);
 
     // UserStatus 함께 생성
-    UserStatus userStatus = new UserStatus(user.getId());
+    UserStatus userStatus = userStatusRepository.findByUserId(user.getId())
+        .orElseGet(() -> UserStatus.builder()
+            .userId(user.getId())
+            .build());
     userStatusRepository.save(userStatus);
 
     return UserDto.Response.of(user, userStatus);
@@ -125,10 +128,11 @@ public class BasicUserService implements UserService {
     userRepository.save(user);
 
     // 상태 정보 반환
-    UserStatus status = userStatusRepository.findById(id)
-        .orElseGet(() -> new UserStatus(id));
-
-    return UserDto.Response.of(user, status);
+    UserStatus userStatus = userStatusRepository.findById(id)
+        .orElseGet(() -> UserStatus.builder()
+            .userId(id)
+            .build());
+    return UserDto.Response.of(user, userStatus);
   }
 
   @Override
