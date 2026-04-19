@@ -2,7 +2,6 @@ package com.sprint.mission.discodeit.entity;
 
 import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import java.time.Instant;
-import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,14 +11,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReadStatus extends BaseUpdatableEntity {
 
-  private UUID userId;
-  private UUID channelId;
+  private User user;
+  private Channel channel;
   private Instant lastReadAt;
 
   @Builder
-  public ReadStatus(UUID userId, UUID channelId, Instant lastReadAt) {
-    this.userId = userId;
-    this.channelId = channelId;
+  public ReadStatus(User user, Channel channel, Instant lastReadAt) {
+    this.user = user;
+    this.channel = channel;
     this.lastReadAt = lastReadAt != null ? lastReadAt : Instant.now();
   }
 

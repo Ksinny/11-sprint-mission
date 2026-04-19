@@ -1,10 +1,10 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.ChannelDto;
-import com.sprint.mission.discodeit.entity.base.BaseEntity;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.ReadStatus;
+import com.sprint.mission.discodeit.entity.base.BaseEntity;
 import com.sprint.mission.discodeit.exception.BusinessException;
 import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.repository.ChannelRepository;

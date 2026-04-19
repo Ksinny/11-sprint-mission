@@ -1,7 +1,6 @@
 package com.sprint.mission.discodeit.entity;
 
 import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
-import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,14 +16,18 @@ public class User extends BaseUpdatableEntity {
 //  private String description;
   private String email;
   private String password;
-  private UUID profileImageId;
+
+  private BinaryContent profile;
+  private UserStatus status;
 
   @Builder
-  public User(String username, String email, String password, UUID profileImageId) {
+  public User(String username, String email, String password, BinaryContent profile,
+      UserStatus status) {
     this.username = username;
     this.email = email;
     this.password = password;
-    this.profileImageId = profileImageId;
+    this.profile = profile;
+    this.status = status;
   }
 
   public void changeUsername(String newUsername) {
@@ -40,9 +43,9 @@ public class User extends BaseUpdatableEntity {
   }
 
   // 프로필 이미지 수정
-  public void updateProfileImage(UUID newProfileImageId) {
-    if (newProfileImageId != null && !newProfileImageId.equals(this.profileImageId)) {
-      this.profileImageId = newProfileImageId;
+  public void updateProfileImage(BinaryContent newProfile) {
+    if (newProfile != null && !newProfile.equals(this.profile)) {
+      this.profile = newProfile;
     }
   }
 
@@ -53,18 +56,4 @@ public class User extends BaseUpdatableEntity {
       throw new IllegalArgumentException("Invalid username or password");
     }
   }
-
-  @Override
-  public String toString() {
-    return "사용자 [" +
-        "UUID: " + getId() +
-        "\n이름: " + getUsername() +
-        ", 이메일: " + getEmail() +
-        // ", 비밀번호: " + getPassword() + // 추후 비밀번호 관련 로직 변경 예정 + 제외
-        ", 프로필 사진: " + getProfileImageId() +
-        ", 생성 시간: " + getCreatedAt() +
-        ", 수정 시간: " + getUpdatedAt() +
-        "]\n";
-  }
-
 }

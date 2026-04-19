@@ -14,16 +14,16 @@ import lombok.NoArgsConstructor;
 public class Message extends BaseUpdatableEntity {
 
   private String content;
-  private UUID authorId;
-  private UUID channelId;
+  private User author;
+  private Channel channel;
   private List<UUID> attachmentIds;
 
 
   @Builder
-  public Message(String content, UUID authorId, UUID channelId, List<UUID> attachmentIds) {
+  public Message(String content, User author, Channel channel, List<UUID> attachmentIds) {
     this.content = content;
-    this.authorId = authorId;
-    this.channelId = channelId;
+    this.author = author;
+    this.channel = channel;
     this.attachmentIds = attachmentIds != null ? new ArrayList<>(attachmentIds) : new ArrayList<>();
   }
 
@@ -37,17 +37,5 @@ public class Message extends BaseUpdatableEntity {
   // 첨부파일 추가
   public void addAttachment(UUID attachmentId) {
     this.attachmentIds.add(attachmentId);
-  }
-
-  @Override
-  public String toString() {
-    return "Message [" +
-        "UUID: " + getId() +
-        "\n발신자 ID: " + getAuthorId() +
-        ", 채널 ID: " + getChannelId() +
-        ", 내용: " + getContent() +
-        ", 작성 시간: " + getCreatedAt() +
-        ", 수정 시간: " + getUpdatedAt() +
-        "]\n";
   }
 }

@@ -2,7 +2,6 @@ package com.sprint.mission.discodeit.entity;
 
 import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import java.time.Instant;
-import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,12 +11,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserStatus extends BaseUpdatableEntity {
 
-  private UUID userId;
+  private User user;
   private Instant lastActiveAt;
 
   @Builder
-  public UserStatus(UUID userId, Instant lastActiveAt) {
-    this.userId = userId;
+  public UserStatus(User user, Instant lastActiveAt) {
+    this.user = user;
     this.lastActiveAt = lastActiveAt != null ? lastActiveAt : Instant.now();
   }
 
