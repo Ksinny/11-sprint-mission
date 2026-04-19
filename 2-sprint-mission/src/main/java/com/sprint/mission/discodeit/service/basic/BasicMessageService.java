@@ -16,6 +16,7 @@ import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.MessageService;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -57,11 +58,17 @@ public class BasicMessageService implements MessageService {
 
 
   @Override
-  public PageResponse<MessageDto.Response> findAllByChannelId(UUID channelId, Pageable pageable) {
-    Slice<Message> messageSlice = messageRepository.findAllByChannelId(channelId, pageable);
+  public PageResponse<MessageDto.Response> findAllByChannelId(UUID channelId, Instant cursor,
+      Pageable pageable) {
+    Slice<Message> messageSlice = messageRepository.findAllByChannelId(channelId, cursor, pageable);
     Slice<MessageDto.Response> responseSlice = messageSlice.map(messageMapper::toDto);
 
-    return pageResponseMapper.fromSlice(responseSlice);
+    Instant nextCursor = null;
+    if (messageSlice.hasNext() && !messageSlice.getContent().isEmpty()) {
+      List<Message> content = messageSlice.getContent();
+      nextCursor = content.get(content.size() - 1).getCreatedAt();
+    }
+    return pageResponseMapper.fromSlice(responseSlice, nextCursor);
   }
 
   @Override

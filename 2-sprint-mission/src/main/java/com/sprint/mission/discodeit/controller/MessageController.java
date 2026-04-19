@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.dto.MessageDto;
 import com.sprint.mission.discodeit.dto.PageResponse;
 import com.sprint.mission.discodeit.service.MessageService;
 import jakarta.validation.Valid;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -62,8 +63,10 @@ public class MessageController {
   @GetMapping
   public ResponseEntity<PageResponse<MessageDto.Response>> findAllByChannelId(
       @RequestParam UUID channelId,
+      @RequestParam(required = false) Instant cursor,
       @PageableDefault(size = 50, sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
     PageResponse<MessageDto.Response> responseList = messageService.findAllByChannelId(channelId,
+        cursor,
         pageable);
 
     return ResponseEntity.ok(responseList);
