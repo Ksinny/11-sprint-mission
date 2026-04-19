@@ -39,23 +39,10 @@ public class ReadStatusDto {
   @Builder
   public record Response(
       UUID id,
-      Instant createdAt,
-      Instant updatedAt,
       UUID userId,
       UUID channelId,
       Instant lastReadAt
   ) {
 
-    // Entity -> DTO
-    public static Response of(ReadStatus readStatus) {
-      return Response.builder()
-          .id(readStatus.getId())
-          .createdAt(readStatus.getCreatedAt())
-          .updatedAt(readStatus.getUpdatedAt())
-          .userId(readStatus.getUser().getId())
-          .channelId(readStatus.getChannel().getId())
-          .lastReadAt(readStatus.getLastReadAt())
-          .build();
-    }
   }
 }

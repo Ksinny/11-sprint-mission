@@ -55,21 +55,9 @@ public class MessageDto {
       Instant updatedAt,
       String content,
       UUID channelId,
-      UUID authorId,
-      List<UUID> attachmentIds
+      UserDto.Response author,
+      List<BinaryContentDto.Response> attachments
   ) {
 
-    // Entity -> DTO
-    public static Response of(Message message) {
-      return Response.builder()
-          .id(message.getId())
-          .createdAt(message.getCreatedAt())
-          .updatedAt(message.getUpdatedAt())
-          .content(message.getContent())
-          .channelId(message.getChannel().getId())
-          .authorId(message.getAuthor().getId())
-          .attachmentIds(message.getAttachments().stream().map(BinaryContent::getId).toList())
-          .build();
-    }
   }
 }

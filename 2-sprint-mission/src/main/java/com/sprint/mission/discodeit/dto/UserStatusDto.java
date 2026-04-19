@@ -32,17 +32,8 @@ public class UserStatusDto {
   public record Response(
       UUID id,
       UUID userId,
-      Instant lastActiveAt,
-      boolean isOnline
+      Instant lastActiveAt
   ) {
 
-    public static Response of(UserStatus userStatus) {
-      return Response.builder()
-          .id(userStatus.getId())
-          .userId(userStatus.getUser().getId())
-          .lastActiveAt(userStatus.getLastActiveAt())
-          .isOnline(userStatus.isOnline())
-          .build();
-    }
   }
 }

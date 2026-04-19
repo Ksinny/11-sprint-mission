@@ -2,12 +2,10 @@ package com.sprint.mission.discodeit.dto;
 
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.entity.UserStatus;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import java.time.Instant;
 import java.util.UUID;
 import lombok.Builder;
 
@@ -57,25 +55,11 @@ public class UserDto {
   @Builder
   public record Response(
       UUID id,
-      Instant createdAt,
-      Instant updatedAt,
       String username,
       String email,
-      UUID profileId,
+      BinaryContentDto.Response profile,
       Boolean online
   ) {
 
-    // Entity -> DTO
-    public static Response of(User user, UserStatus status) {
-      return Response.builder()
-          .id(user.getId())
-          .createdAt(user.getCreatedAt())
-          .updatedAt(user.getUpdatedAt())
-          .username(user.getUsername())
-          .email(user.getEmail())
-          .profileId(user.getProfile().getId())
-          .online(status.isOnline())
-          .build();
-    }
   }
 }

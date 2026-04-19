@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -79,20 +78,8 @@ public class BinaryContentDto {
       String fileName,
       Long size,
       String contentType,
-      byte[] bytes,
-      Instant createdAt
+      byte[] bytes
   ) {
 
-    // Entity -> DTO
-    public static Response of(BinaryContent content) {
-      return Response.builder()
-          .id(content.getId())
-          .fileName(content.getFileName())
-          .size(content.getSize())
-          .contentType(content.getContentType())
-          .bytes(content.getBytes())
-          .createdAt(content.getCreatedAt())
-          .build();
-    }
   }
 }

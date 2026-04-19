@@ -57,20 +57,9 @@ public class ChannelDto {
       ChannelType type,
       String name,
       String description,
-      Instant lastMessageAt,
-      List<UUID> participantIds
+      List<UserDto.Response> participants,
+      Instant lastMessageAt
   ) {
 
-    // Entity -> DTO
-    public static Response of(Channel channel, Instant lastMessageAt, List<UUID> participantIds) {
-      return Response.builder()
-          .id(channel.getId())
-          .type(channel.getType())
-          .name(channel.getName())
-          .description(channel.getDescription())
-          .lastMessageAt(lastMessageAt)
-          .participantIds(channel.getType() == ChannelType.PRIVATE ? participantIds : null)
-          .build();
-    }
   }
 }
