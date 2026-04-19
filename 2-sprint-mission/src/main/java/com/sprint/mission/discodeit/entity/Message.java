@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.entity;
 
 import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -33,13 +34,13 @@ public class Message extends BaseUpdatableEntity {
   @JoinColumn(name = "channel_id", columnDefinition = "uuid")
   private Channel channel;
 
-  @OneToMany
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinTable(
       name = "message_attachments",
       joinColumns = @JoinColumn(name = "message_id"),
       inverseJoinColumns = @JoinColumn(name = "attachment_id")
   )
-  private List<BinaryContent> attachmentIds;
+  private List<BinaryContent> attachments;
 
 
   @Builder
@@ -47,7 +48,7 @@ public class Message extends BaseUpdatableEntity {
     this.content = content;
     this.author = author;
     this.channel = channel;
-    this.attachmentIds = attachmentIds != null ? new ArrayList<>(attachments) : new ArrayList<>();
+    this.attachments = attachments != null ? new ArrayList<>(attachments) : new ArrayList<>();
   }
 
   // 메시지 내용만 수정 가능
@@ -59,6 +60,6 @@ public class Message extends BaseUpdatableEntity {
 
   // 첨부파일 추가
   public void addAttachment(BinaryContent attachment) {
-    this.attachmentIds.add(attachment);
+    this.attachments.add(attachment);
   }
 }
