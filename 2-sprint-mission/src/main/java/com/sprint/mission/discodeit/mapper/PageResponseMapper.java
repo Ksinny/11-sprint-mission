@@ -9,20 +9,20 @@ import org.springframework.stereotype.Component;
 public class PageResponseMapper {
 
   // Slice
-  public <T> PageResponse<T> fromSlice(Slice<T> slice) {
+  public <T> PageResponse<T> fromSlice(Slice<T> slice, Object nextCursor) {
     return PageResponse.<T>builder()
         .content(slice.getContent())
-        .number(slice.getNumber())
+        .nextCursor(nextCursor)
         .size(slice.getSize())
         .hasNext(slice.hasNext())
         .build();
   }
 
   // Page
-  public <T> PageResponse<T> fromPage(Page<T> page) {
+  public <T> PageResponse<T> fromPage(Page<T> page, Object nextCursor) {
     return PageResponse.<T>builder()
         .content(page.getContent())
-        .number(page.getNumber())
+        .nextCursor(nextCursor)
         .size(page.getSize())
         .hasNext(page.hasNext())
         .totalElements(page.getTotalElements())
