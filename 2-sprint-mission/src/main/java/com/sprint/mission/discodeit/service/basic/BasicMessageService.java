@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.dto.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.MessageDto;
 import com.sprint.mission.discodeit.dto.MessageDto.CreateRequest;
+import com.sprint.mission.discodeit.dto.PageResponse;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
@@ -10,6 +11,7 @@ import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exception.BusinessException;
 import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.mapper.MessageMapper;
+import com.sprint.mission.discodeit.mapper.PageResponseMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -18,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +34,7 @@ public class BasicMessageService implements MessageService {
   private final ChannelRepository channelRepository;
   private final UserRepository userRepository;
   private final MessageMapper messageMapper;
+  private final PageResponseMapper pageResponseMapper;
 
   @Override
   public MessageDto.Response create(CreateRequest request,
@@ -52,14 +57,11 @@ public class BasicMessageService implements MessageService {
 
 
   @Override
-  public List<MessageDto.Response> findAllByChannelId(UUID channelId) {
-    if (!channelRepository.existsById(channelId)) {
-      throw new BusinessException(ErrorCode.CHANNEL_NOT_FOUND);
-    }
+  public PageResponse<MessageDto.Response> findAllByChannelId(UUID channelId, Pageable pageable) {
+    Slice<Message> messageSlice = messageRepository.findAllByChannelId(channelId, pageable);
+    Slice<MessageDto.Response> responseSlice = messageSlice.map(messageMapper::toDto);
 
-    return messageRepository.findAllByChannelId(channelId).stream()
-        .map(messageMapper::toDto)
-        .toList();
+    return pageResponseMapper.fromSlice(responseSlice);
   }
 
   @Override
@@ -75,8 +77,9 @@ public class BasicMessageService implements MessageService {
   @Override
   @Transactional
   public void delete(UUID id) {
-    Message message = messageRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ErrorCode.MESSAGE_NOT_FOUND));
+    if (!messageRepository.existsById(id)) {
+      throw new BusinessException(ErrorCode.MESSAGE_NOT_FOUND);
+    }
 
     messageRepository.deleteById(id);
   }
