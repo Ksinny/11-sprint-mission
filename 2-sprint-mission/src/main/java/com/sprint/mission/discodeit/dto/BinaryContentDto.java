@@ -5,7 +5,6 @@ import com.sprint.mission.discodeit.exception.BusinessException;
 import com.sprint.mission.discodeit.exception.ErrorCode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -21,9 +20,6 @@ public class BinaryContentDto {
   public record CreateRequest(
       @NotBlank(message = "파일명은 필수 항목입니다.")
       String fileName,
-
-      @NotNull(message = "파일 크기 정보가 누락되었습니다.")
-      Long size,
 
       @NotBlank(message = "콘텐츠 타입은 필수 항목입니다.")
       String contentType,
@@ -42,7 +38,6 @@ public class BinaryContentDto {
       try {
         return CreateRequest.builder()
             .fileName(file.getOriginalFilename())
-            .size(file.getSize())
             .contentType(file.getContentType())
             .bytes(file.getBytes())
             .build();
@@ -65,9 +60,7 @@ public class BinaryContentDto {
     public BinaryContent toEntity() {
       return BinaryContent.builder()
           .fileName(this.fileName)
-          .size(this.size)
           .contentType(this.contentType)
-          .bytes(this.bytes)
           .build();
     }
   }

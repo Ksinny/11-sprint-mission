@@ -8,16 +8,15 @@ import org.springframework.stereotype.Component;
 public class BinaryContentMapper {
 
   public BinaryContentDto.Response toDto(BinaryContent entity) {
-      if (entity == null) {
-          return null;
-      }
+    if (entity == null) {
+      return null;
+    }
 
     return BinaryContentDto.Response.builder()
         .id(entity.getId())
         .fileName(entity.getFileName())
         .size(entity.getSize())
         .contentType(entity.getContentType())
-        .bytes(entity.getBytes())
         .build();
   }
 }
