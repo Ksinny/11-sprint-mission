@@ -24,6 +24,8 @@ public class BinaryContentDto {
       @NotBlank(message = "콘텐츠 타입은 필수 항목입니다.")
       String contentType,
 
+      Long size,
+
       @NotEmpty(message = "파일 데이터가 비어있습니다.")
       byte[] bytes
   ) {
@@ -39,6 +41,7 @@ public class BinaryContentDto {
         return CreateRequest.builder()
             .fileName(file.getOriginalFilename())
             .contentType(file.getContentType())
+            .size(file.getSize())
             .bytes(file.getBytes())
             .build();
       } catch (IOException e) {
@@ -61,6 +64,7 @@ public class BinaryContentDto {
       return BinaryContent.builder()
           .fileName(this.fileName)
           .contentType(this.contentType)
+          .size(this.size)
           .build();
     }
   }

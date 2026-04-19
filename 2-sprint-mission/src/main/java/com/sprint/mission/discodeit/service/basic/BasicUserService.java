@@ -4,13 +4,13 @@ import com.sprint.mission.discodeit.dto.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.UserDto;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.exception.BusinessException;
 import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.mapper.UserMapper;
+import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
-import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,9 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class BasicUserService implements UserService {
 
   private final UserRepository userRepository;
-  private final UserStatusRepository userStatusRepository;
+  private final BinaryContentRepository binaryContentRepository;
   private final UserMapper userMapper;
-
+  private final BinaryContentStorage binaryContentStorage;
 
   @Override
   @Transactional
@@ -42,9 +42,12 @@ public class BasicUserService implements UserService {
 
     BinaryContent profile = profileImageRequest != null ? profileImageRequest.toEntity() : null;
     User user = request.toEntity(profile);
-    UserStatus userStatus = UserStatus.builder().user(user).build();
 
     userRepository.save(user);
+
+    if (profile != null) {
+      binaryContentStorage.put(profile.getId(), profileImageRequest.bytes());
+    }
 
     return userMapper.toDto(user);
   }
@@ -53,9 +56,6 @@ public class BasicUserService implements UserService {
   public UserDto.Response findById(UUID id) {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-    UserStatus userStatus = userStatusRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ErrorCode.USER_STATUS_NOT_FOUND));
 
     return userMapper.toDto(user);
   }
@@ -74,12 +74,14 @@ public class BasicUserService implements UserService {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-    // 프로필 이미지 변경 -> 기존 프로필 이미지 자동 삭제
     if (profileImageRequest != null) {
       BinaryContent newImage = profileImageRequest.toEntity();
+
+      binaryContentRepository.save(newImage);
+      binaryContentStorage.put(newImage.getId(), profileImageRequest.bytes());
+
       user.updateProfileImage(newImage);
     }
-
     // 사용자명 수정
     Optional.ofNullable(request.newUsername())
         .filter(newUsername -> !newUsername.equals(user.getUsername()))

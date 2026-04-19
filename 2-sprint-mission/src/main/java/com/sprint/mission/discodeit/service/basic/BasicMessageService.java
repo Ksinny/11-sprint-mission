@@ -12,10 +12,12 @@ import com.sprint.mission.discodeit.exception.BusinessException;
 import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.mapper.MessageMapper;
 import com.sprint.mission.discodeit.mapper.PageResponseMapper;
+import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.MessageService;
+import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,10 +36,13 @@ public class BasicMessageService implements MessageService {
   private final MessageRepository messageRepository;
   private final ChannelRepository channelRepository;
   private final UserRepository userRepository;
+  private final BinaryContentRepository binaryContentRepository;
   private final MessageMapper messageMapper;
   private final PageResponseMapper pageResponseMapper;
+  private final BinaryContentStorage binaryContentStorage;
 
   @Override
+  @Transactional
   public MessageDto.Response create(CreateRequest request,
       List<BinaryContentDto.CreateRequest> fileRequests) {
     Channel channel = channelRepository.findById(request.channelId())
@@ -50,6 +55,16 @@ public class BasicMessageService implements MessageService {
         ? fileRequests.stream().map(BinaryContentDto.CreateRequest::toEntity).toList()
         : new ArrayList<>();
 
+    if (!attachments.isEmpty()) {
+      binaryContentRepository.saveAll(attachments);
+
+      for (int i = 0; i < attachments.size(); i++) {
+        BinaryContent entity = attachments.get(i);
+        BinaryContentDto.CreateRequest fileReq = fileRequests.get(i);
+        binaryContentStorage.put(entity.getId(), fileReq.bytes());
+      }
+    }
+
     Message message = request.toEntity(channel, author, attachments);
     messageRepository.save(message);
 
@@ -60,7 +75,10 @@ public class BasicMessageService implements MessageService {
   @Override
   public PageResponse<MessageDto.Response> findAllByChannelId(UUID channelId, Instant cursor,
       Pageable pageable) {
-    Slice<Message> messageSlice = messageRepository.findAllByChannelId(channelId, cursor, pageable);
+    Instant effectiveCursor =
+        (cursor != null) ? cursor : Instant.now().plus(1, java.time.temporal.ChronoUnit.DAYS);
+    Slice<Message> messageSlice = messageRepository.findAllByChannelId(channelId, effectiveCursor,
+        pageable);
     Slice<MessageDto.Response> responseSlice = messageSlice.map(messageMapper::toDto);
 
     Instant nextCursor = null;
