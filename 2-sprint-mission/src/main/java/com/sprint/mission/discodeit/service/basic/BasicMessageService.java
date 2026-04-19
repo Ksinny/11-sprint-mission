@@ -9,6 +9,7 @@ import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exception.BusinessException;
 import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.mapper.MessageMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -28,6 +29,7 @@ public class BasicMessageService implements MessageService {
   private final MessageRepository messageRepository;
   private final ChannelRepository channelRepository;
   private final UserRepository userRepository;
+  private final MessageMapper messageMapper;
 
   @Override
   public MessageDto.Response create(CreateRequest request,
@@ -45,7 +47,7 @@ public class BasicMessageService implements MessageService {
     Message message = request.toEntity(channel, author, attachments);
     messageRepository.save(message);
 
-    return MessageDto.Response.of(message);
+    return messageMapper.toDto(message);
   }
 
 
@@ -56,7 +58,7 @@ public class BasicMessageService implements MessageService {
     }
 
     return messageRepository.findAllByChannelId(channelId).stream()
-        .map(MessageDto.Response::of)
+        .map(messageMapper::toDto)
         .toList();
   }
 
@@ -67,7 +69,7 @@ public class BasicMessageService implements MessageService {
         .orElseThrow(() -> new BusinessException(ErrorCode.MESSAGE_NOT_FOUND));
     message.update(request.newContent());
 
-    return MessageDto.Response.of(message);
+    return messageMapper.toDto(message);
   }
 
   @Override

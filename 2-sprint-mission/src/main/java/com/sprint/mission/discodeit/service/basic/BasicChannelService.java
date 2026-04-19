@@ -5,15 +5,14 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.entity.base.BaseEntity;
 import com.sprint.mission.discodeit.exception.BusinessException;
 import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.mapper.ChannelMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -30,14 +29,14 @@ public class BasicChannelService implements ChannelService {
   private final ReadStatusRepository readStatusRepository;
   private final MessageRepository messageRepository;
   private final UserRepository userRepository;
+  private final ChannelMapper channelMapper;
 
   @Override
   @Transactional
   public ChannelDto.Response createPublicChannel(ChannelDto.CreatePublicRequest request) {
     Channel channel = request.toEntity();
     channelRepository.save(channel);
-
-    return toResponse(channel);
+    return channelMapper.toDto(channel);
   }
 
   @Override
@@ -58,24 +57,7 @@ public class BasicChannelService implements ChannelService {
 
       readStatusRepository.saveAll(readStatuses);
     }
-    return toResponse(channel);
-  }
-
-  // 공통 로직
-  private ChannelDto.Response toResponse(Channel channel) {
-    // 가장 최신 메시지
-    Instant lastMessageAt = messageRepository.findTopByChannelIdOrderByCreatedAtDesc(
-            channel.getId())
-        .map(BaseEntity::getCreatedAt)
-        .orElse(null);
-
-    List<UUID> participantIds = null;
-    if (channel.getType() == ChannelType.PRIVATE) {
-      participantIds = readStatusRepository.findAllByChannelId(channel.getId()).stream()
-          .map(readStatus -> readStatus.getChannel().getId())
-          .toList();
-    }
-    return ChannelDto.Response.of(channel, lastMessageAt, participantIds);
+    return channelMapper.toDto(channel);
   }
 
   @Override
@@ -83,7 +65,7 @@ public class BasicChannelService implements ChannelService {
     Channel channel = channelRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ErrorCode.CHANNEL_NOT_FOUND));
 
-    return toResponse(channel);
+    return channelMapper.toDto(channel);
   }
 
   @Override
@@ -94,7 +76,7 @@ public class BasicChannelService implements ChannelService {
 
     return channelRepository.findAllByTypeOrIdIn(ChannelType.PUBLIC, myChannelIds)
         .stream()
-        .map(this::toResponse)
+        .map(channelMapper::toDto)
         .toList();
   }
 
@@ -109,7 +91,7 @@ public class BasicChannelService implements ChannelService {
     }
 
     channel.update(request.newName(), request.newDescription());
-    return toResponse(channel);
+    return channelMapper.toDto(channel);
   }
 
   @Override

@@ -6,6 +6,7 @@ import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exception.BusinessException;
 import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.mapper.ReadStatusMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -25,6 +26,7 @@ public class BasicReadStatusService implements ReadStatusService {
   private final ReadStatusRepository readStatusRepository;
   private final UserRepository userRepository;
   private final ChannelRepository channelRepository;
+  private final ReadStatusMapper readStatusMapper;
 
 
   @Override
@@ -42,20 +44,20 @@ public class BasicReadStatusService implements ReadStatusService {
     ReadStatus readStatus = request.toEntity(user, channel);
     readStatusRepository.save(readStatus);
 
-    return ReadStatusDto.Response.of(readStatus);
+    return readStatusMapper.toDto(readStatus);
   }
 
   @Override
   public ReadStatusDto.Response findById(UUID id) {
     ReadStatus readStatus = readStatusRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ErrorCode.READ_STATUS_NOT_FOUND));
-    return ReadStatusDto.Response.of(readStatus);
+    return readStatusMapper.toDto(readStatus);
   }
 
   @Override
   public List<ReadStatusDto.Response> findAllByUserId(UUID userId) {
     return readStatusRepository.findAllByUserId(userId).stream()
-        .map(ReadStatusDto.Response::of)
+        .map(readStatusMapper::toDto)
         .toList();
   }
 
@@ -70,7 +72,7 @@ public class BasicReadStatusService implements ReadStatusService {
         : Instant.now();
     readStatus.update(newLastReadAt);
 
-    return ReadStatusDto.Response.of(readStatus);
+    return readStatusMapper.toDto(readStatus);
   }
 
   @Override

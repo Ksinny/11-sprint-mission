@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.dto.BinaryContentDto.Response;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.exception.BusinessException;
 import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.mapper.BinaryContentMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import java.util.List;
@@ -19,26 +20,28 @@ import org.springframework.transaction.annotation.Transactional;
 public class BasicBinaryContentService implements BinaryContentService {
 
   private final BinaryContentRepository binaryContentRepository;
+  private final BinaryContentMapper binaryContentMapper;
 
   @Override
   @Transactional
   public BinaryContentDto.Response create(BinaryContentDto.CreateRequest request) {
     BinaryContent binaryContent = request.toEntity();
+    binaryContentRepository.save(binaryContent);
 
-    return BinaryContentDto.Response.of(binaryContentRepository.save(binaryContent));
+    return binaryContentMapper.toDto(binaryContent);
   }
 
   @Override
   public Response findById(UUID id) {
     return binaryContentRepository.findById(id)
-        .map(BinaryContentDto.Response::of)
+        .map(binaryContentMapper::toDto)
         .orElseThrow(() -> new BusinessException(ErrorCode.BINARY_CONTENT_NOT_FOUND));
   }
 
   @Override
   public List<Response> findAllByIdIn(List<UUID> ids) {
     return binaryContentRepository.findAllByIdIn(ids).stream()
-        .map(BinaryContentDto.Response::of)
+        .map(binaryContentMapper::toDto)
         .toList();
   }
 

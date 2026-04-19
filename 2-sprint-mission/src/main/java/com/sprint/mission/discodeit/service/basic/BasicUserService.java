@@ -7,7 +7,7 @@ import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.exception.BusinessException;
 import com.sprint.mission.discodeit.exception.ErrorCode;
-import com.sprint.mission.discodeit.repository.BinaryContentRepository;
+import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.UserService;
@@ -25,7 +25,7 @@ public class BasicUserService implements UserService {
 
   private final UserRepository userRepository;
   private final UserStatusRepository userStatusRepository;
-  private final BinaryContentRepository binaryContentRepository;
+  private final UserMapper userMapper;
 
 
   @Override
@@ -46,7 +46,7 @@ public class BasicUserService implements UserService {
 
     userRepository.save(user);
 
-    return UserDto.Response.of(user, userStatus);
+    return userMapper.toDto(user);
   }
 
   @Override
@@ -57,15 +57,13 @@ public class BasicUserService implements UserService {
     UserStatus userStatus = userStatusRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ErrorCode.USER_STATUS_NOT_FOUND));
 
-    return UserDto.Response.of(user, userStatus);
+    return userMapper.toDto(user);
   }
 
   @Override
   public List<UserDto.Response> findAll() {
-    List<User> users = userRepository.findAll();
-
-    return users.stream()
-        .map(user -> UserDto.Response.of(user, user.getStatus()))
+    return userRepository.findAll().stream()
+        .map(userMapper::toDto)
         .toList();
   }
 
@@ -106,7 +104,7 @@ public class BasicUserService implements UserService {
     Optional.ofNullable(request.newPassword())
         .ifPresent(user::changePassword);
 
-    return UserDto.Response.of(user, user.getStatus());
+    return userMapper.toDto(user);
   }
 
   @Override

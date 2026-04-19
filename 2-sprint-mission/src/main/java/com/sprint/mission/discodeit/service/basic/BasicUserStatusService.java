@@ -6,6 +6,7 @@ import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.exception.BusinessException;
 import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.mapper.UserStatusMapper;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.UserStatusService;
@@ -24,6 +25,7 @@ public class BasicUserStatusService implements UserStatusService {
 
   private final UserStatusRepository userStatusRepository;
   private final UserRepository userRepository;
+  private final UserStatusMapper userStatusMapper;
 
   @Override
   @Transactional
@@ -37,22 +39,22 @@ public class BasicUserStatusService implements UserStatusService {
         });
 
     UserStatus userStatus = new UserStatus(user, request.lastActiveAt());
-
     userStatusRepository.save(userStatus);
-    return UserStatusDto.Response.of(userStatus);
+
+    return userStatusMapper.toDto(userStatus);
   }
 
   @Override
   public UserStatusDto.Response findById(UUID id) {
     return userStatusRepository.findById(id)
-        .map(UserStatusDto.Response::of)
+        .map(userStatusMapper::toDto)
         .orElseThrow(() -> new BusinessException(ErrorCode.USER_STATUS_NOT_FOUND));
   }
 
   @Override
   public List<UserStatusDto.Response> findAll() {
     return userStatusRepository.findAll().stream()
-        .map(UserStatusDto.Response::of)
+        .map(userStatusMapper::toDto)
         .toList();
   }
 
@@ -67,8 +69,9 @@ public class BasicUserStatusService implements UserStatusService {
         ? request.newLastActiveAt()
         : Instant.now();
     userStatus.updateActiveTime(updateTime);
+    userStatusRepository.save(userStatus);
 
-    return UserStatusDto.Response.of(userStatusRepository.save(userStatus));
+    return userStatusMapper.toDto(userStatus);
   }
 
 
@@ -82,7 +85,7 @@ public class BasicUserStatusService implements UserStatusService {
         request.newLastActiveAt() != null ? request.newLastActiveAt() : Instant.now();
     userStatus.updateActiveTime(newLastActiveAt);
 
-    return UserStatusDto.Response.of(userStatus);
+    return userStatusMapper.toDto(userStatus);
   }
 
   @Override
