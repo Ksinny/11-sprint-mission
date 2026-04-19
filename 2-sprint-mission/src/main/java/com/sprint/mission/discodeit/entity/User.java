@@ -1,24 +1,42 @@
 package com.sprint.mission.discodeit.entity;
 
 import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+@Entity
+@Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseUpdatableEntity {
 
+  @Column(length = 50, nullable = false, unique = true)
   private String username;
-  //  미사용 필드 주석처리
-//  private String nickname;
-//  private String description;
+
+  @Column(length = 100, nullable = false, unique = true)
   private String email;
+
+  @Column(length = 60, nullable = false)
   private String password;
 
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "profile_id", columnDefinition = "uuid")
   private BinaryContent profile;
+
+  @OneToOne(mappedBy = "user")
   private UserStatus status;
+
+  //  미사용 필드 주석처리
+  //  private String nickname;
+  //  private String description;
 
   @Builder
   public User(String username, String email, String password, BinaryContent profile,
