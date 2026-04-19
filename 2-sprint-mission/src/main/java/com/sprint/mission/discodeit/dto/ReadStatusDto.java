@@ -1,6 +1,8 @@
 package com.sprint.mission.discodeit.dto;
 
+import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ReadStatus;
+import com.sprint.mission.discodeit.entity.User;
 import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.UUID;
@@ -19,10 +21,10 @@ public class ReadStatusDto {
   ) {
 
     // DTO -> Entity
-    public ReadStatus toEntity() {
+    public ReadStatus toEntity(User user, Channel channel) {
       return ReadStatus.builder()
-          .userId(this.userId)
-          .channelId(this.channelId)
+          .user(user)
+          .channel(channel)
           .lastReadAt(this.lastReadAt)
           .build();
     }
@@ -50,8 +52,8 @@ public class ReadStatusDto {
           .id(readStatus.getId())
           .createdAt(readStatus.getCreatedAt())
           .updatedAt(readStatus.getUpdatedAt())
-          .userId(readStatus.getUserId())
-          .channelId(readStatus.getChannelId())
+          .userId(readStatus.getUser().getId())
+          .channelId(readStatus.getChannel().getId())
           .lastReadAt(readStatus.getLastReadAt())
           .build();
     }

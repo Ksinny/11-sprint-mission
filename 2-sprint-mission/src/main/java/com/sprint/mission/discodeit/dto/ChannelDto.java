@@ -37,7 +37,7 @@ public class ChannelDto {
     // DTO -> Entity
     // 엔티티의 정적 팩토리 메서드 호출
     public Channel toEntity() {
-      return Channel.createPrivate(this.participantIds);
+      return Channel.createPrivate();
     }
   }
 

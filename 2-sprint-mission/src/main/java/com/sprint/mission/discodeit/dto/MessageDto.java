@@ -1,6 +1,9 @@
 package com.sprint.mission.discodeit.dto;
 
+import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
+import com.sprint.mission.discodeit.entity.User;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -27,12 +30,12 @@ public class MessageDto {
   ) {
 
     // DTO -> Entity
-    public Message toEntity(List<UUID> attachmentIds) {
+    public Message toEntity(Channel channel, User author, List<BinaryContent> attachments) {
       return Message.builder()
           .content(this.content)
-          .channelId(this.channelId)
-          .authorId(this.authorId)
-          .attachmentIds(attachmentIds != null ? new ArrayList<>(attachmentIds) : new ArrayList<>())
+          .channel(channel)
+          .author(author)
+          .attachments(attachments != null ? new ArrayList<>(attachments) : new ArrayList<>())
           .build();
     }
   }
@@ -63,9 +66,9 @@ public class MessageDto {
           .createdAt(message.getCreatedAt())
           .updatedAt(message.getUpdatedAt())
           .content(message.getContent())
-          .channelId(message.getChannelId())
-          .authorId(message.getAuthorId())
-          .attachmentIds(message.getAttachmentIds())
+          .channelId(message.getChannel().getId())
+          .authorId(message.getAuthor().getId())
+          .attachmentIds(message.getAttachments().stream().map(BinaryContent::getId).toList())
           .build();
     }
   }
