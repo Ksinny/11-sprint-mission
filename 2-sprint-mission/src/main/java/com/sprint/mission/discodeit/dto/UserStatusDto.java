@@ -17,7 +17,6 @@ public class UserStatusDto {
 
     public UserStatus toEntity() {
       return UserStatus.builder()
-          .userId(this.userId)
           .lastActiveAt(this.lastActiveAt)
           .build();
     }
@@ -40,7 +39,7 @@ public class UserStatusDto {
     public static Response of(UserStatus userStatus) {
       return Response.builder()
           .id(userStatus.getId())
-          .userId(userStatus.getUserId())
+          .userId(userStatus.getUser().getId())
           .lastActiveAt(userStatus.getLastActiveAt())
           .isOnline(userStatus.isOnline())
           .build();

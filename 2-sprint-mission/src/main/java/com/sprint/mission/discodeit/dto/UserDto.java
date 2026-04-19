@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.dto;
 
+import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.entity.UserStatus;
 import jakarta.validation.constraints.Email;
@@ -29,12 +30,12 @@ public class UserDto {
   ) {
 
     // DTO -> Entity
-    public User toEntity(UUID profileImageId) {
+    public User toEntity(BinaryContent profileImage) {
       return User.builder()
           .username(this.username)
           .email(this.email)
           .password(this.password)
-          .profileImageId(profileImageId)
+          .profile(profileImage)
           .build();
     }
   }
@@ -72,7 +73,7 @@ public class UserDto {
           .updatedAt(user.getUpdatedAt())
           .username(user.getUsername())
           .email(user.getEmail())
-          .profileId(user.getProfileImageId())
+          .profileId(user.getProfile().getId())
           .online(status.isOnline())
           .build();
     }

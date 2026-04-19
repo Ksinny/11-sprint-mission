@@ -12,6 +12,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Entity
@@ -32,6 +33,7 @@ public class User extends BaseUpdatableEntity {
   @JoinColumn(name = "profile_id", columnDefinition = "uuid")
   private BinaryContent profile;
 
+  @Setter(AccessLevel.PROTECTED)
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private UserStatus status;
 

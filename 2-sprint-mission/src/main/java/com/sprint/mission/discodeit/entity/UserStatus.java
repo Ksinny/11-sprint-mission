@@ -28,7 +28,7 @@ public class UserStatus extends BaseUpdatableEntity {
 
   @Builder
   public UserStatus(User user, Instant lastActiveAt) {
-    this.user = user;
+    this.setUser(user);
     this.lastActiveAt = lastActiveAt != null ? lastActiveAt : Instant.now();
   }
 
@@ -41,6 +41,13 @@ public class UserStatus extends BaseUpdatableEntity {
   public void updateActiveTime(Instant lastActiveAt) {
     if (lastActiveAt != null && !lastActiveAt.equals(this.lastActiveAt)) {
       this.lastActiveAt = lastActiveAt;
+    }
+  }
+
+  protected void setUser(User user) {
+    this.user = user;
+    if (user != null) {
+      user.setStatus(this);
     }
   }
 }
