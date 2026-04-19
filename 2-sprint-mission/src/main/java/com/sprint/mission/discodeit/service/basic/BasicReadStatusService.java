@@ -56,7 +56,7 @@ public class BasicReadStatusService implements ReadStatusService {
 
   @Override
   public List<ReadStatusDto.Response> findAllByUserId(UUID userId) {
-    return readStatusRepository.findAllByUserId(userId).stream()
+    return readStatusRepository.findAllByUserIdWithChannelAndUser(userId).stream()
         .map(readStatusMapper::toDto)
         .toList();
   }

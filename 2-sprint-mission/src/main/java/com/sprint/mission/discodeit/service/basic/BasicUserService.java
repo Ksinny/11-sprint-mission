@@ -62,7 +62,7 @@ public class BasicUserService implements UserService {
 
   @Override
   public List<UserDto.Response> findAll() {
-    return userRepository.findAll().stream()
+    return userRepository.findAllWithProfileAndStatus().stream()
         .map(userMapper::toDto)
         .toList();
   }
