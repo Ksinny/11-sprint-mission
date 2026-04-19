@@ -2,31 +2,12 @@ package com.sprint.mission.discodeit.mapper;
 
 import com.sprint.mission.discodeit.dto.MessageDto;
 import com.sprint.mission.discodeit.entity.Message;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Component
-@RequiredArgsConstructor
-public class MessageMapper {
+@Mapper(componentModel = "spring", uses = {UserMapper.class, BinaryContentMapper.class})
+public interface MessageMapper {
 
-  private final UserMapper userMapper;
-  private final BinaryContentMapper binaryContentMapper;
-
-  public MessageDto.Response toDto(Message entity) {
-      if (entity == null) {
-          return null;
-      }
-
-    return MessageDto.Response.builder()
-        .id(entity.getId())
-        .createdAt(entity.getCreatedAt())
-        .updatedAt(entity.getUpdatedAt())
-        .content(entity.getContent())
-        .channelId(entity.getChannel().getId())
-        .author(userMapper.toDto(entity.getAuthor()))
-        .attachments(entity.getAttachments().stream()
-            .map(binaryContentMapper::toDto)
-            .toList())
-        .build();
-  }
+  @Mapping(target = "channelId", source = "channel.id")
+  MessageDto.Response toDto(Message entity);
 }
