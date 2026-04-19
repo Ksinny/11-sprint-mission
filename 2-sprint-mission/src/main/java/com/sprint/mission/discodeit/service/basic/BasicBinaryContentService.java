@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.BinaryContentDto;
+import com.sprint.mission.discodeit.dto.BinaryContentDto.Response;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.exception.BusinessException;
 import com.sprint.mission.discodeit.exception.ErrorCode;
@@ -10,14 +11,17 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class BasicBinaryContentService implements BinaryContentService {
 
   private final BinaryContentRepository binaryContentRepository;
 
   @Override
+  @Transactional
   public BinaryContentDto.Response create(BinaryContentDto.CreateRequest request) {
     BinaryContent binaryContent = request.toEntity();
 
@@ -25,17 +29,21 @@ public class BasicBinaryContentService implements BinaryContentService {
   }
 
   @Override
-  public BinaryContent findById(UUID id) {
+  public Response findById(UUID id) {
     return binaryContentRepository.findById(id)
+        .map(BinaryContentDto.Response::of)
         .orElseThrow(() -> new BusinessException(ErrorCode.BINARY_CONTENT_NOT_FOUND));
   }
 
   @Override
-  public List<BinaryContent> findAllByIdIn(List<UUID> ids) {
-    return binaryContentRepository.findAllByIdIn(ids);
+  public List<Response> findAllByIdIn(List<UUID> ids) {
+    return binaryContentRepository.findAllByIdIn(ids).stream()
+        .map(BinaryContentDto.Response::of)
+        .toList();
   }
 
   @Override
+  @Transactional
   public void delete(UUID id) {
     if (!binaryContentRepository.existsById(id)) {
       throw new BusinessException(ErrorCode.BINARY_CONTENT_NOT_FOUND);
