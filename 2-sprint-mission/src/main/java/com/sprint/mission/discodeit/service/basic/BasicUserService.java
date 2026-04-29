@@ -4,6 +4,7 @@ import com.sprint.mission.discodeit.dto.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.UserDto;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.exception.BusinessException;
 import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.mapper.UserMapper;
@@ -42,6 +43,10 @@ public class BasicUserService implements UserService {
 
     BinaryContent profile = profileImageRequest != null ? profileImageRequest.toEntity() : null;
     User user = request.toEntity(profile);
+
+    UserStatus.builder()
+        .user(user)
+        .build();
 
     userRepository.save(user);
 
