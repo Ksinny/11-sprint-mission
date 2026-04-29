@@ -11,11 +11,6 @@ spring:
   jpa:
     open-in-view: false # OSIV 비활성화
 
-logging:
-  level:
-    org.hibernate.SQL: debug
-    org.hibernate.orm.jdbc.bind: trace
-
 discodeit:
   repository:
     type: file
