@@ -10,6 +10,10 @@ spring:
       max-request-size: 50MB
   jpa:
     open-in-view: false # OSIV 비활성화
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
 
 discodeit:
   repository:
@@ -19,3 +23,7 @@ discodeit:
     type: local
     local:
       root-path: ./uploads/
+
+logging:
+  level:
+    root: info
