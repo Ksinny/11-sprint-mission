@@ -16,9 +16,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -33,6 +35,8 @@ public class BasicUserService implements UserService {
   @Transactional
   public UserDto.Response create(UserDto.CreateRequest request,
       BinaryContentDto.CreateRequest profileImageRequest) {
+    log.debug("사용자 생성 시작: username={}, email={}", request.username(), request.email());
+
     if (userRepository.existsByUsername(request.username())) {
       throw new BusinessException(ErrorCode.DUPLICATE_NAME);
     }
@@ -54,28 +58,35 @@ public class BasicUserService implements UserService {
       binaryContentStorage.put(profile.getId(), profileImageRequest.bytes());
     }
 
+    log.info("사용자 생성 완료: userId={}, username={}", user.getId(), user.getUsername());
     return userMapper.toDto(user);
   }
 
   @Override
   public UserDto.Response findById(UUID id) {
+    log.debug("사용자 단건 조회 시작: id={}", id);
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
+    log.info("사용자 단건 조회 완료: id={}", id);
     return userMapper.toDto(user);
   }
 
   @Override
   public List<UserDto.Response> findAll() {
-    return userRepository.findAllWithProfileAndStatus().stream()
+    log.debug("사용자 전체 조회 시작");
+    List<UserDto.Response> responses = userRepository.findAllWithProfileAndStatus().stream()
         .map(userMapper::toDto)
         .toList();
+    log.info("사용자 전체 조회 완료: 총 {}건", responses.size());
+    return responses;
   }
 
   @Override
   @Transactional
   public UserDto.Response update(UUID id, UserDto.UpdateRequest request,
       BinaryContentDto.CreateRequest profileImageRequest) {
+    log.debug("사용자 업데이트 시작: id={}", id);
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
@@ -111,15 +122,18 @@ public class BasicUserService implements UserService {
     Optional.ofNullable(request.newPassword())
         .ifPresent(user::changePassword);
 
+    log.info("사용자 업데이트 완료: userId={}", id);
     return userMapper.toDto(user);
   }
 
   @Override
   @Transactional
   public void delete(UUID id) {
+    log.debug("사용자 삭제 시작: id={}", id);
     User user = userRepository.findById(id)
         .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
     userRepository.delete(user);
+    log.info("사용자 삭제 완료: userId={}", id);
   }
 }
