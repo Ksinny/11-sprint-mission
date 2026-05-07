@@ -5,8 +5,8 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.exception.BusinessException;
-import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
+import com.sprint.mission.discodeit.exception.channel.PrivateChannelUpdateException;
 import com.sprint.mission.discodeit.mapper.ChannelMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
@@ -37,6 +37,7 @@ public class BasicChannelService implements ChannelService {
   @Transactional
   public ChannelDto.Response createPublicChannel(ChannelDto.CreatePublicRequest request) {
     log.debug("퍼블릭 채널 생성 시작: name={}", request.name());
+
     Channel channel = request.toEntity();
     channelRepository.save(channel);
 
@@ -72,8 +73,9 @@ public class BasicChannelService implements ChannelService {
   @Override
   public ChannelDto.Response findById(UUID id) {
     log.debug("채널 단건 조회 시작: id={}", id);
+
     Channel channel = channelRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ErrorCode.CHANNEL_NOT_FOUND));
+        .orElseThrow(() -> ChannelNotFoundException.withId(id));
 
     log.info("채널 단건 조회 완료: id={}", id);
     return channelMapper.toDto(channel);
@@ -82,6 +84,7 @@ public class BasicChannelService implements ChannelService {
   @Override
   public List<ChannelDto.Response> findAllByUserId(UUID userId) {
     log.debug("사용자 소속 채널 목록 조회 시작: userId={}", userId);
+
     List<UUID> myChannelIds = readStatusRepository.findAllByUserId(userId).stream()
         .map(readStatus -> readStatus.getChannel().getId())
         .toList();
@@ -100,13 +103,13 @@ public class BasicChannelService implements ChannelService {
   @Transactional
   public ChannelDto.Response update(UUID id, ChannelDto.UpdateRequest request) {
     log.debug("채널 업데이트 시작: channelId={}", id);
+
     Channel channel = channelRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ErrorCode.CHANNEL_NOT_FOUND));
+        .orElseThrow(() -> ChannelNotFoundException.withId(id));
 
     if (channel.getType() == ChannelType.PRIVATE) {
-      throw new BusinessException(ErrorCode.PRIVATE_CHANNEL_UPDATE_NOT_ALLOWED);
+      throw PrivateChannelUpdateException.forChannel(id);
     }
-
     channel.update(request.newName(), request.newDescription());
 
     log.info("채널 업데이트 완료: channelId={}", id);
@@ -117,8 +120,9 @@ public class BasicChannelService implements ChannelService {
   @Transactional
   public void delete(UUID id) {
     log.debug("채널 삭제 시작: channelId={}", id);
+
     if (!channelRepository.existsById(id)) {
-      throw new BusinessException(ErrorCode.CHANNEL_NOT_FOUND);
+      throw ChannelNotFoundException.withId(id);
     }
     messageRepository.deleteByChannelId(id);
     readStatusRepository.deleteByChannelId(id);

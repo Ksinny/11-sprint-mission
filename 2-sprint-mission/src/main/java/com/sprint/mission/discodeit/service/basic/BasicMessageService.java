@@ -8,8 +8,9 @@ import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.exception.BusinessException;
-import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
+import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.MessageMapper;
 import com.sprint.mission.discodeit.mapper.PageResponseMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
@@ -50,10 +51,10 @@ public class BasicMessageService implements MessageService {
     log.debug("메시지 생성 시작: channelId={}, authorId={}", request.channelId(), request.authorId());
 
     Channel channel = channelRepository.findById(request.channelId())
-        .orElseThrow(() -> new BusinessException(ErrorCode.CHANNEL_NOT_FOUND));
+        .orElseThrow(() -> ChannelNotFoundException.withId(request.channelId()));
 
     User author = userRepository.findById(request.authorId())
-        .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        .orElseThrow(() -> UserNotFoundException.withId(request.authorId()));
 
     List<BinaryContent> attachments = (fileRequests != null)
         ? fileRequests.stream().map(BinaryContentDto.CreateRequest::toEntity).toList()
@@ -81,6 +82,7 @@ public class BasicMessageService implements MessageService {
   public PageResponse<MessageDto.Response> findAllByChannelId(UUID channelId, Instant cursor,
       Pageable pageable) {
     log.debug("채널 메시지 목록 페이징 조회 시작: channelId={}", channelId);
+
     Instant effectiveCursor =
         (cursor != null) ? cursor : Instant.now().plus(1, java.time.temporal.ChronoUnit.DAYS);
     Slice<Message> messageSlice = messageRepository.findAllByChannelId(channelId, effectiveCursor,
@@ -101,7 +103,7 @@ public class BasicMessageService implements MessageService {
   public MessageDto.Response update(UUID id, MessageDto.UpdateRequest request) {
     log.debug("메시지 업데이트 시작: messageId={}", id);
     Message message = messageRepository.findById(id)
-        .orElseThrow(() -> new BusinessException(ErrorCode.MESSAGE_NOT_FOUND));
+        .orElseThrow(() -> MessageNotFoundException.withId(id));
     message.update(request.newContent());
 
     log.info("메시지 업데이트 완료: messageId={}", id);
@@ -114,7 +116,7 @@ public class BasicMessageService implements MessageService {
     log.debug("메시지 삭제 시작: messageId={}", id);
 
     if (!messageRepository.existsById(id)) {
-      throw new BusinessException(ErrorCode.MESSAGE_NOT_FOUND);
+      throw MessageNotFoundException.withId(id);
     }
 
     messageRepository.deleteById(id);
