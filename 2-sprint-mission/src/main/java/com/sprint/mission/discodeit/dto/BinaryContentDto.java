@@ -1,8 +1,7 @@
 package com.sprint.mission.discodeit.dto;
 
 import com.sprint.mission.discodeit.entity.BinaryContent;
-import com.sprint.mission.discodeit.exception.BusinessException;
-import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.binarycontent.FileOperationException;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import java.io.IOException;
@@ -45,7 +44,7 @@ public class BinaryContentDto {
             .bytes(file.getBytes())
             .build();
       } catch (IOException e) {
-        throw new BusinessException(ErrorCode.FILE_READ_FAILED);
+        throw FileOperationException.readFailed();
       }
     }
 
