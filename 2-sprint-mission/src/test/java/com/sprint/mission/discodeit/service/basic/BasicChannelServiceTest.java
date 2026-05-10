@@ -184,6 +184,46 @@ class BasicChannelServiceTest {
     then(channelRepository).shouldHaveNoMoreInteractions();
   }
 
+  // FindById 테스트
+  @Test
+  @DisplayName("채널 단건 조회 성공")
+  void findById_success() {
+    // Given
+    UUID channelId = UUID.randomUUID();
+    Channel mockChannel = Channel.createPublic("공개 채널", "설명");
+    ChannelDto.Response mockResponse = ChannelDto.Response.builder()
+        .name("공개 채널")
+        .build();
+
+    given(channelRepository.findById(channelId)).willReturn(Optional.of(mockChannel));
+    given(channelMapper.toDto(mockChannel)).willReturn(mockResponse);
+
+    // When
+    ChannelDto.Response result = channelService.findById(channelId);
+
+    // Then
+    assertThat(result.name()).isEqualTo("공개 채널");
+
+    then(channelRepository).should().findById(channelId);
+    then(channelMapper).should().toDto(mockChannel);
+  }
+
+  @Test
+  @DisplayName("존재하지 않는 채널 단건 조회 시 ChannelNotFoundException 발생")
+  void findById_fail_channelNotFound() {
+    // Given
+    UUID notExistingId = UUID.randomUUID();
+
+    given(channelRepository.findById(notExistingId)).willReturn(Optional.empty());
+
+    // When & Then
+    assertThatThrownBy(() -> channelService.findById(notExistingId))
+        .isInstanceOf(ChannelNotFoundException.class);
+
+    then(channelRepository).should().findById(notExistingId);
+    then(channelMapper).shouldHaveNoInteractions();
+  }
+
   // findAllByUserId 테스트
   @Test
   @DisplayName("사용자 소속 채널 목록 조회 성공")

@@ -130,6 +130,39 @@ class BasicUserServiceTest {
   }
 
   @Test
+  @DisplayName("사용자 수정 성공 - 기존 정보와 완전히 동일한 정보로 수정을 요청하는 경우")
+  void update_success_sameValues() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    User existingUser = User.builder()
+        .username("woody")
+        .email("woody@test.com")
+        .password("pass1234!")
+        .build();
+    
+    UserDto.UpdateRequest updateRequest = new UserDto.UpdateRequest(
+        "woody", "woody@test.com", "pass1234!"
+    );
+    UserDto.Response mockResponse = UserDto.Response.builder()
+        .username(existingUser.getUsername())
+        .email(existingUser.getEmail())
+        .build();
+
+    given(userRepository.findById(userId)).willReturn(Optional.of(existingUser));
+    given(userMapper.toDto(any(User.class))).willReturn(mockResponse);
+
+    // When
+    UserDto.Response result = userService.update(userId, updateRequest, null);
+
+    // Then
+    assertThat(result.username()).isEqualTo(existingUser.getUsername());
+    assertThat(result.email()).isEqualTo(existingUser.getEmail());
+
+    then(userRepository).should().findById(userId);
+    then(userRepository).shouldHaveNoMoreInteractions();
+  }
+
+  @Test
   @DisplayName("존재하지 않는 사용자 수정 시 UserNotFoundException 발생")
   void update_fail_userNotFound() {
     // Given
@@ -143,6 +176,28 @@ class BasicUserServiceTest {
     // When & Then
     assertThatThrownBy(() -> userService.update(notExistingId, updateRequest, null))
         .isInstanceOf(UserNotFoundException.class);
+  }
+
+  @Test
+  @DisplayName("이메일 중복으로 사용자 수정 실패 시 UserAlreadyExistsException 발생")
+  void update_fail_duplicateEmail() {
+    // Given
+    UUID existingId = UUID.randomUUID();
+    User existingUser = User.builder()
+        .username("oldWoody")
+        .email("old@test.com")
+        .build();
+    UserDto.UpdateRequest updateRequest = new UserDto.UpdateRequest(
+        "newWoody", "duplicate@test.com", null
+    );
+
+    given(userRepository.findById(existingId)).willReturn(Optional.of(existingUser));
+    given(userRepository.existsByUsername(updateRequest.newUsername())).willReturn(false);
+    given(userRepository.existsByEmail(updateRequest.newEmail())).willReturn(true);
+
+    // When & Then
+    assertThatThrownBy(() -> userService.update(existingId, updateRequest, null))
+        .isInstanceOf(UserAlreadyExistsException.class);
   }
 
   // Delete 테스트
@@ -175,5 +230,50 @@ class BasicUserServiceTest {
         .isInstanceOf(UserNotFoundException.class);
 
     then(userRepository).shouldHaveNoMoreInteractions();
+  }
+
+  // FindById 테스트
+  @Test
+  @DisplayName("사용자 단건 조회 성공")
+  void findById_success() {
+    // Given
+    UUID userId = UUID.randomUUID();
+    User existingUser = User.builder()
+        .username("woody")
+        .email("woody@test.com")
+        .build();
+    UserDto.Response mockResponse = UserDto.Response.builder()
+        .username(existingUser.getUsername())
+        .email(existingUser.getEmail())
+        .build();
+
+    given(userRepository.findById(userId)).willReturn(Optional.of(existingUser));
+    given(userMapper.toDto(existingUser)).willReturn(mockResponse);
+
+    // When
+    UserDto.Response result = userService.findById(userId);
+
+    // Then
+    assertThat(result.username()).isEqualTo(existingUser.getUsername());
+    assertThat(result.email()).isEqualTo(existingUser.getEmail());
+
+    then(userRepository).should().findById(userId);
+    then(userMapper).should().toDto(existingUser);
+  }
+
+  @Test
+  @DisplayName("존재하지 않는 사용자 단건 조회 시 UserNotFoundException 발생")
+  void findById_fail_userNotFound() {
+    // Given
+    UUID notExistingId = UUID.randomUUID();
+
+    given(userRepository.findById(notExistingId)).willReturn(Optional.empty());
+
+    // When & Then
+    assertThatThrownBy(() -> userService.findById(notExistingId))
+        .isInstanceOf(UserNotFoundException.class);
+
+    then(userRepository).should().findById(notExistingId);
+    then(userMapper).shouldHaveNoInteractions();
   }
 }

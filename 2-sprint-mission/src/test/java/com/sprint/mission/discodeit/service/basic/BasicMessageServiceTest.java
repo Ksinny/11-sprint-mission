@@ -14,6 +14,7 @@ import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.MessageMapper;
 import com.sprint.mission.discodeit.mapper.PageResponseMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
@@ -102,6 +103,28 @@ class BasicMessageServiceTest {
     // When & Then
     assertThatThrownBy(() -> messageService.create(request, null))
         .isInstanceOf(ChannelNotFoundException.class);
+  }
+
+  @Test
+  @DisplayName("존재하지 않는 작성자로 메시지 생성 시 UserNotFoundException 발생")
+  void create_fail_authorNotFound() {
+    // Given
+    UUID channelId = UUID.randomUUID();
+    UUID notExistingAuthorId = UUID.randomUUID();
+    Channel mockChannel = Channel.createPublic("공개 채널", "설명");
+    MessageDto.CreateRequest request = new MessageDto.CreateRequest("안녕하세요!", channelId,
+        notExistingAuthorId);
+
+    given(channelRepository.findById(request.channelId())).willReturn(Optional.of(mockChannel));
+    given(userRepository.findById(request.authorId())).willReturn(Optional.empty());
+
+    // When & Then
+    assertThatThrownBy(() -> messageService.create(request, null))
+        .isInstanceOf(UserNotFoundException.class);
+
+    then(channelRepository).should().findById(request.channelId());
+    then(userRepository).should().findById(request.authorId());
+    then(messageRepository).shouldHaveNoInteractions();
   }
 
   // Update 테스트
