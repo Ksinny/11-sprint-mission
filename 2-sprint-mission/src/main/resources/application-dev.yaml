@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  application:
+    name: discodeit
   datasource:
     url: jdbc:postgresql://localhost:5432/discodeit
     username: discodeit_user
@@ -10,6 +12,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+  boot:
+    admin:
+      client:
+        url: http://localhost:9090
 
 logging:
   level:
