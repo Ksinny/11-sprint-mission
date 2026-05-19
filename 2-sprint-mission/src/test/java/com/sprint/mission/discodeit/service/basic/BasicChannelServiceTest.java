@@ -14,6 +14,7 @@ import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.ChannelMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
@@ -94,6 +95,28 @@ class BasicChannelServiceTest {
     assertThat(result.type()).isEqualTo(request.toEntity().getType());
     then(channelRepository).should().save(any(Channel.class));
     then(readStatusRepository).should().saveAll(anyList());
+  }
+
+  @Test
+  @DisplayName("존재하지 않는 참여자 ID 포함 시 프라이빗 채널 생성 실패")
+  void createPrivateChannel_fail_someUsersNotFound() {
+    // Given
+    UUID validUserId = UUID.randomUUID();
+    UUID invalidUserId = UUID.randomUUID();
+
+    List<UUID> requestIds = List.of(validUserId, invalidUserId);
+    ChannelDto.CreatePrivateRequest request = new ChannelDto.CreatePrivateRequest(requestIds);
+
+    User mockUser = User.builder().username("woody").build();
+
+    given(userRepository.findAllById(requestIds)).willReturn(List.of(mockUser));
+
+    // When & Then
+    assertThatThrownBy(() -> channelService.createPrivateChannel(request))
+        .isInstanceOf(UserNotFoundException.class);
+
+    then(channelRepository).shouldHaveNoInteractions();
+    then(readStatusRepository).shouldHaveNoInteractions();
   }
 
   // Update 테스트

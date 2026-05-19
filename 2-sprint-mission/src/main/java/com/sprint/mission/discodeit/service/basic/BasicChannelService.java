@@ -6,12 +6,14 @@ import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.entity.ReadStatus;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.ChannelMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -47,14 +49,22 @@ public class BasicChannelService implements ChannelService {
   @Override
   @Transactional
   public ChannelDto.Response createPrivateChannel(ChannelDto.CreatePrivateRequest request) {
-    int participantCount = (request.participantIds() != null) ? request.participantIds().size() : 0;
-    log.debug("프라이빗 채널 생성 시작: 참여자 수={}", participantCount);
+    List<UUID> participantIds =
+        request.participantIds() != null ? request.participantIds() : Collections.emptyList();
+    log.debug("프라이빗 채널 생성 시작: 참여자 수={}", participantIds.size());
+
+    List<User> participants = userRepository.findAllById(participantIds);
+
+    if (participants.size() != participantIds.size()) {
+      log.warn("유효하지 않은 유저 ID가 포함되어 있습니다. (요청: {}명, 실제: {}명)", participantIds.size(),
+          participants.size());
+      throw UserNotFoundException.withIds(participantIds);
+    }
 
     Channel channel = request.toEntity();
     channelRepository.save(channel);
-    if (request.participantIds() != null && !request.participantIds().isEmpty()) {
-      List<User> participants = userRepository.findAllById(request.participantIds());
-
+    
+    if (!participants.isEmpty()) {
       List<ReadStatus> readStatuses = participants.stream()
           .map(user -> ReadStatus.builder()
               .user(user)
