@@ -80,17 +80,19 @@ class BasicAuthServiceTest {
   void login_fail_wrongPassword() {
     // Given
     AuthDto.LoginRequest request = new AuthDto.LoginRequest("testuser", "wrong_password");
-    User mockUser = mock(User.class);
+    User user = User.builder()
+        .username("testuser")
+        .email("test@example.com")
+        .password("Password123!")
+        .build();
 
-    given(userRepository.findByUsername(request.username())).willReturn(Optional.of(mockUser));
-    given(mockUser.matchesPassword(request.password())).willReturn(false);
+    given(userRepository.findByUsername(request.username())).willReturn(Optional.of(user));
 
     // When & Then
     assertThatThrownBy(() -> authService.login(request))
         .isInstanceOf(InvalidCredentialsException.class);
 
     then(userRepository).should().findByUsername(request.username());
-    then(mockUser).should().matchesPassword(request.password());
     then(userMapper).shouldHaveNoInteractions();
   }
 }
