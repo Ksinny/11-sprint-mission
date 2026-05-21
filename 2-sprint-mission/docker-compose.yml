@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  app:
+    image: discodeit:local
+    build:
+      context: .
+    container_name: discodeit-app
+    ports:
+      - "8081:80"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - PROD_DB_URL=jdbc:postgresql://db:5432/${DB_NAME}
+      - PROD_DB_USERNAME=${DB_USER}
+      - PROD_DB_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - binary-content-storage:/app/storage
+    depends_on:
+      - db
+    networks:
+      - discodeit-network
+  db:
+    image: postgres:17-alpine
+    container_name: discodeit-db
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - discodeit-network
+
+volumes:
+  postgres-data:
+  binary-content-storage:
+
+networks:
+  discodeit-network:
+    driver: bridge
