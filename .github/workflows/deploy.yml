@@ -33,6 +33,8 @@ jobs:
             -t ${{ vars.ECR_REPOSITORY_URI }}:${{ github.sha }} \
             -t ${{ vars.ECR_REPOSITORY_URI }}:latest \
             --push \
+            -f 2-sprint-mission/Dockerfile \
+            2-sprint-mission
             .
 
   deploy:
