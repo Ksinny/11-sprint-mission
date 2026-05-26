@@ -35,7 +35,6 @@ jobs:
             --push \
             -f 2-sprint-mission/Dockerfile \
             2-sprint-mission
-            .
 
   deploy:
     runs-on: ubuntu-latest
