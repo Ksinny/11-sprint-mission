@@ -5,8 +5,11 @@ import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentNotFoun
 import com.sprint.mission.discodeit.exception.binarycontent.StorageOperationException;
 import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import jakarta.annotation.PreDestroy;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URLConnection;
 import java.time.Duration;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -78,16 +81,22 @@ public class S3BinaryContentStorage implements BinaryContentStorage {
   public UUID put(UUID binaryContentId, byte[] bytes) {
     String key = binaryContentId.toString();
     try {
+      String contentType = URLConnection.guessContentTypeFromStream(
+          new ByteArrayInputStream(bytes));
+      if (contentType == null) {
+        contentType = "application/octet-stream";
+      }
+
       PutObjectRequest request = PutObjectRequest.builder()
           .bucket(bucket)
           .key(key)
+          .contentType(contentType)
           .build();
 
       s3Client.putObject(request, RequestBody.fromBytes(bytes));
       log.info("S3 파일 업로드 성공: {}", key);
-
       return binaryContentId;
-    } catch (S3Exception e) {
+    } catch (S3Exception | IOException e) {
       log.error("S3 파일 업로드 실패: {}", key, e);
       throw StorageOperationException.uploadFailed();
     }
