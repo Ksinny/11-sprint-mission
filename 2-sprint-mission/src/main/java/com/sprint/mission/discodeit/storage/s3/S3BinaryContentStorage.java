@@ -5,7 +5,6 @@ import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentNotFoun
 import com.sprint.mission.discodeit.exception.binarycontent.StorageOperationException;
 import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import jakarta.annotation.PreDestroy;
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.time.Duration;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Component;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
@@ -102,10 +102,10 @@ public class S3BinaryContentStorage implements BinaryContentStorage {
           .key(key)
           .build();
 
-      byte[] bytes = s3Client.getObjectAsBytes(request).asByteArray();
+      InputStream inputStream = s3Client.getObject(request, ResponseTransformer.toInputStream());
       log.info("S3 파일 조회 성공: {}", key);
 
-      return new ByteArrayInputStream(bytes);
+      return inputStream;
     } catch (S3Exception e) {
       if (e.statusCode() == 404) {
         log.error("S3 파일 조회 실패 - 존재하지 않는 파일: {}", key);
