@@ -7,7 +7,6 @@ import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.AuthService;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,13 +24,22 @@ public class BasicAuthService implements AuthService {
   @Override
   @Transactional
   public UserDto.Response updateRole(UserRoleUpdateRequest request) {
-    UUID userId = request.userId();
-    User user = userRepository.findById(userId)
-        .orElseThrow(() -> UserNotFoundException.withId(userId));
+    log.debug("권한 수정 요청: userId={}, newRole={}", request.userId(), request.newRole());
+    return applyRole(request);
+  }
 
+  @Override
+  @Transactional
+  public UserDto.Response updateRoleInternal(UserRoleUpdateRequest request) {
+    log.debug("내부 권한 수정: userId={}, newRole={}", request.userId(), request.newRole());
+    return applyRole(request);
+  }
+
+  private UserDto.Response applyRole(UserRoleUpdateRequest request) {
+    User user = userRepository.findById(request.userId())
+        .orElseThrow(() -> UserNotFoundException.withId(request.userId()));
     user.updateRole(request.newRole());
-
-    log.info("사용자 권한 수정 완료: userId={}, newRole={}", userId, request.newRole());
+    log.info("사용자 권한 수정 완료: userId={}, newRole={}", request.userId(), request.newRole());
     return userMapper.toDto(user);
   }
 }
