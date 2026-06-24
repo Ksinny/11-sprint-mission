@@ -17,6 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,8 @@ public class BasicUserService implements UserService {
   private final BinaryContentRepository binaryContentRepository;
   private final UserMapper userMapper;
   private final BinaryContentStorage binaryContentStorage;
+
+  private final PasswordEncoder passwordEncoder;
 
   @Override
   @Transactional
@@ -54,7 +57,8 @@ public class BasicUserService implements UserService {
         binaryContentStorage.put(profile.getId(), profileImageRequest.bytes());
       }
 
-      User user = request.toEntity(profile);
+      String encodedPassword = passwordEncoder.encode(request.password());
+      User user = request.toEntity(encodedPassword, profile);
 
       UserStatus.builder()
           .user(user)

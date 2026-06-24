@@ -29,11 +29,11 @@ public class UserDto {
   ) {
 
     // DTO -> Entity
-    public User toEntity(BinaryContent profileImage) {
+    public User toEntity(String encodedPassword, BinaryContent profileImage) {
       return User.builder()
           .username(this.username)
           .email(this.email)
-          .password(this.password)
+          .password(encodedPassword)
           .profile(profileImage)
           .build();
     }
