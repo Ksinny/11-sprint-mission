@@ -72,6 +72,11 @@ public class SecurityConfig {
                 .maxSessionsPreventsLogin(false)
                 .sessionRegistry(sessionRegistry)
             )
+        )
+        .rememberMe(rememberMe -> rememberMe
+            .rememberMeParameter("remember-me")
+            .tokenValiditySeconds(60 * 60 * 24) // 1일
+            .key("discodeit-remember-me-key")
         );
     return http.build();
   }
