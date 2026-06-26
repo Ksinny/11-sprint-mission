@@ -23,6 +23,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 
 @EnableMethodSecurity
@@ -100,4 +101,10 @@ public class SecurityConfig {
   public SessionRegistry sessionRegistry() {
     return new SessionRegistryImpl();
   }
+
+  @Bean
+  public HttpSessionEventPublisher httpSessionEventPublisher() {
+    return new HttpSessionEventPublisher();
+  }
+
 }

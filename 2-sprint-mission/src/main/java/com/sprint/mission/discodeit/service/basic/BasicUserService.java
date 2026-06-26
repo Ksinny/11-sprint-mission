@@ -4,7 +4,6 @@ import com.sprint.mission.discodeit.dto.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.UserDto;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.entity.UserStatus;
 import com.sprint.mission.discodeit.exception.user.UserAlreadyExistsException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.UserMapper;
@@ -60,10 +59,6 @@ public class BasicUserService implements UserService {
       String encodedPassword = passwordEncoder.encode(request.password());
       User user = request.toEntity(encodedPassword, profile);
 
-      UserStatus.builder()
-          .user(user)
-          .build();
-
       userRepository.save(user);
 
       log.info("사용자 생성 완료: userId={}, username={}", user.getId(), user.getUsername());
@@ -91,7 +86,7 @@ public class BasicUserService implements UserService {
   public List<UserDto.Response> findAll() {
     log.debug("사용자 전체 조회 시작");
 
-    List<UserDto.Response> responses = userRepository.findAllWithProfileAndStatus().stream()
+    List<UserDto.Response> responses = userRepository.findAllWithProfile().stream()
         .map(userMapper::toDto)
         .toList();
 
