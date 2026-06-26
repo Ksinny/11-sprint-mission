@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.config;
 import com.sprint.mission.discodeit.security.LoginFailureHandler;
 import com.sprint.mission.discodeit.security.LoginSuccessHandler;
 import com.sprint.mission.discodeit.security.SpaCsrfTokenRequestHandler;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -49,6 +50,12 @@ public class SecurityConfig {
                 PathPatternRequestMatcher.withDefaults().matcher("/api/**")
             )).permitAll()
             .anyRequest().authenticated()
+        )
+        .exceptionHandling(exception -> exception
+            .authenticationEntryPoint((request, response, authException) ->
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED))
+            .accessDeniedHandler((request, response, accessDeniedException) ->
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN))
         );
     return http.build();
   }
