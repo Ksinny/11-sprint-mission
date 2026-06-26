@@ -15,6 +15,8 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -30,7 +32,8 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http,
       LoginSuccessHandler loginSuccessHandler,
-      LoginFailureHandler loginFailureHandler) throws Exception {
+      LoginFailureHandler loginFailureHandler,
+      SessionRegistry sessionRegistry) throws Exception {
     http
         .csrf(csrf -> csrf
             .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
@@ -61,6 +64,13 @@ public class SecurityConfig {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED))
             .accessDeniedHandler((request, response, accessDeniedException) ->
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN))
+        )
+        .sessionManagement(management -> management
+            .sessionConcurrency(concurrency -> concurrency
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(false)
+                .sessionRegistry(sessionRegistry)
+            )
         );
     return http.build();
   }
@@ -86,4 +96,8 @@ public class SecurityConfig {
     return handler;
   }
 
+  @Bean
+  public SessionRegistry sessionRegistry() {
+    return new SessionRegistryImpl();
+  }
 }
