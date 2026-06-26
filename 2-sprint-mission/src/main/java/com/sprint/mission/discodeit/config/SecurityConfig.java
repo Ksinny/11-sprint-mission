@@ -30,6 +30,10 @@ import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 @Configuration
 public class SecurityConfig {
 
+  private static final String REMEMBER_ME_KEY = "discodeit-remember-me-key";
+  private static final String REMEMBER_ME_PARAMETER = "remember-me";
+  private static final int REMEMBER_ME_TOKEN_VALIDITY_SECONDS = 60 * 60 * 24 * 1; // 1일
+
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http,
       LoginSuccessHandler loginSuccessHandler,
@@ -74,9 +78,9 @@ public class SecurityConfig {
             )
         )
         .rememberMe(rememberMe -> rememberMe
-            .rememberMeParameter("remember-me")
-            .tokenValiditySeconds(60 * 60 * 24) // 1일
-            .key("discodeit-remember-me-key")
+            .key(REMEMBER_ME_KEY)
+            .rememberMeParameter(REMEMBER_ME_PARAMETER)
+            .tokenValiditySeconds(REMEMBER_ME_TOKEN_VALIDITY_SECONDS)
         );
     return http.build();
   }
