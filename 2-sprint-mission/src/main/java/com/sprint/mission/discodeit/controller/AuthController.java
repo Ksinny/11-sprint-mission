@@ -1,16 +1,19 @@
 package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.dto.JwtDto;
+import com.sprint.mission.discodeit.dto.JwtInformation;
 import com.sprint.mission.discodeit.dto.UserDto;
 import com.sprint.mission.discodeit.dto.UserRoleUpdateRequest;
 import com.sprint.mission.discodeit.exception.auth.RefreshTokenInvalidException;
 import com.sprint.mission.discodeit.security.DiscodeitUserDetails;
+import com.sprint.mission.discodeit.security.jwt.JwtRegistry;
 import com.sprint.mission.discodeit.security.jwt.JwtTokenProvider;
 import com.sprint.mission.discodeit.service.AuthService;
 import com.sprint.mission.discodeit.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +39,7 @@ public class AuthController {
   private final UserService userService;
   private final AuthService authService;
   private final JwtTokenProvider jwtTokenProvider;
+  private final JwtRegistry jwtRegistry;
 
   @GetMapping("/csrf-token")
   public ResponseEntity<Void> getCsrfToken(CsrfToken csrfToken) {
@@ -61,16 +65,23 @@ public class AuthController {
       HttpServletResponse response
   ) {
     log.debug("토큰 리프레시 요청: {}", refreshToken);
-    if (refreshToken == null || !jwtTokenProvider.validateRefreshToken(refreshToken)) {
+    if (refreshToken == null
+        || !jwtTokenProvider.validateRefreshToken(refreshToken)
+        || !jwtRegistry.hasActiveJwtInformationByRefreshToken(refreshToken)) {
       throw RefreshTokenInvalidException.invalid();
     }
-
-    String newAccessToken = jwtTokenProvider.reissueAccessToken(refreshToken);
 
     UUID userId = jwtTokenProvider.getUserId(refreshToken);
     UserDto.Response userDto = userService.findById(userId);
     DiscodeitUserDetails userDetails = new DiscodeitUserDetails(userDto, null);
+
+    String newAccessToken = jwtTokenProvider.generateAccessToken(userDetails);
     String newRefreshToken = jwtTokenProvider.generateRefreshToken(userDetails);
+    Instant expiration = jwtTokenProvider.getExpiration(newRefreshToken);
+
+    JwtInformation newInfo = new JwtInformation(userDto, newAccessToken, newRefreshToken,
+        expiration);
+    jwtRegistry.rotateJwtInformation(refreshToken, newInfo);
 
     ResponseCookie refreshCookie = ResponseCookie
         .from(JwtTokenProvider.REFRESH_TOKEN_COOKIE_NAME, newRefreshToken)
