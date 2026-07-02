@@ -2,13 +2,16 @@ package com.sprint.mission.discodeit.security.jwt.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sprint.mission.discodeit.dto.JwtDto;
+import com.sprint.mission.discodeit.dto.JwtInformation;
 import com.sprint.mission.discodeit.security.DiscodeitUserDetails;
+import com.sprint.mission.discodeit.security.jwt.JwtRegistry;
 import com.sprint.mission.discodeit.security.jwt.JwtTokenProvider;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -25,7 +28,7 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
 
   private final JwtTokenProvider jwtTokenProvider;
   private final ObjectMapper objectMapper;
-  // TODO: JwtRegistry 주입
+  private final JwtRegistry jwtRegistry;
 
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -39,6 +42,10 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
 
     String accessToken = jwtTokenProvider.generateAccessToken(userDetails);
     String refreshToken = jwtTokenProvider.generateRefreshToken(userDetails);
+
+    Instant expiration = jwtTokenProvider.getExpiration(refreshToken);   // 리프레시 기준 만료 시각
+    jwtRegistry.registerJwtInformation(
+        new JwtInformation(userDetails.getUserDto(), accessToken, refreshToken, expiration));
 
     ResponseCookie refreshCookie = ResponseCookie
         .from(JwtTokenProvider.REFRESH_TOKEN_COOKIE_NAME, refreshToken)

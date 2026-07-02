@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.security.jwt.filter;
 import com.sprint.mission.discodeit.dto.UserDto;
 import com.sprint.mission.discodeit.entity.Role;
 import com.sprint.mission.discodeit.security.DiscodeitUserDetails;
+import com.sprint.mission.discodeit.security.jwt.JwtRegistry;
 import com.sprint.mission.discodeit.security.jwt.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -23,6 +24,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private static final String BEARER_PREFIX = "Bearer ";
 
   private final JwtTokenProvider jwtTokenProvider;
+  private final JwtRegistry jwtRegistry;
 
   @Override
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -37,7 +39,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     String token = authHeader.substring(BEARER_PREFIX.length());
 
-    if (jwtTokenProvider.validateAccessToken(token)) {
+    if (jwtTokenProvider.validateAccessToken(token)
+        && jwtRegistry.hasActiveJwtInformationByAccessToken(token)) {
 
       UUID userId = jwtTokenProvider.getUserId(token);
       String username = jwtTokenProvider.getSubject(token);
@@ -60,7 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
       SecurityContextHolder.getContext().setAuthentication(authentication);
     }
-    
+
     filterChain.doFilter(request, response);
   }
 }
