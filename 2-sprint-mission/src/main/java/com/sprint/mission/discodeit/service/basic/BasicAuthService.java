@@ -6,7 +6,6 @@ import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.UserRepository;
-import com.sprint.mission.discodeit.security.SessionManager;
 import com.sprint.mission.discodeit.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,14 +21,12 @@ public class BasicAuthService implements AuthService {
 
   private final UserRepository userRepository;
   private final UserMapper userMapper;
-  private final SessionManager sessionManager;
 
   @Override
   @Transactional
   @PreAuthorize("hasRole('ADMIN')")
   public UserDto.Response updateRole(UserRoleUpdateRequest request) {
     log.debug("권한 수정 요청: userId={}, newRole={}", request.userId(), request.newRole());
-    sessionManager.expireUserSessions(request.userId());
     return applyRole(request);
   }
 

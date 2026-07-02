@@ -15,30 +15,23 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
-import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 
 @EnableMethodSecurity
 @Configuration
 public class SecurityConfig {
 
-  private static final String REMEMBER_ME_KEY = "discodeit-remember-me-key";
-  private static final String REMEMBER_ME_PARAMETER = "remember-me";
-  private static final int REMEMBER_ME_TOKEN_VALIDITY_SECONDS = 60 * 60 * 24 * 1; // 1일
-
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http,
       LoginSuccessHandler loginSuccessHandler,
-      LoginFailureHandler loginFailureHandler,
-      SessionRegistry sessionRegistry) throws Exception {
+      LoginFailureHandler loginFailureHandler) throws Exception {
     http
         .csrf(csrf -> csrf
             .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
@@ -70,17 +63,8 @@ public class SecurityConfig {
             .accessDeniedHandler((request, response, accessDeniedException) ->
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN))
         )
-        .sessionManagement(management -> management
-            .sessionConcurrency(concurrency -> concurrency
-                .maximumSessions(1)
-                .maxSessionsPreventsLogin(false)
-                .sessionRegistry(sessionRegistry)
-            )
-        )
-        .rememberMe(rememberMe -> rememberMe
-            .key(REMEMBER_ME_KEY)
-            .rememberMeParameter(REMEMBER_ME_PARAMETER)
-            .tokenValiditySeconds(REMEMBER_ME_TOKEN_VALIDITY_SECONDS)
+        .sessionManagement(session -> session
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         );
     return http.build();
   }
@@ -105,15 +89,4 @@ public class SecurityConfig {
     handler.setRoleHierarchy(roleHierarchy);
     return handler;
   }
-
-  @Bean
-  public SessionRegistry sessionRegistry() {
-    return new SessionRegistryImpl();
-  }
-
-  @Bean
-  public HttpSessionEventPublisher httpSessionEventPublisher() {
-    return new HttpSessionEventPublisher();
-  }
-
 }
