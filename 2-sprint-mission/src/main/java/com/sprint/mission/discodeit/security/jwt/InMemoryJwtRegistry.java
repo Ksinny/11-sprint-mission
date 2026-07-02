@@ -7,6 +7,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 
 @Slf4j
 public class InMemoryJwtRegistry implements JwtRegistry {
@@ -66,11 +67,13 @@ public class InMemoryJwtRegistry implements JwtRegistry {
     return newJwtInformation;
   }
 
+  @Scheduled(fixedDelay = 1000 * 60 * 5)
   @Override
   public void clearExpiredJwtInformation() {
     origin.values().forEach(queue ->
         queue.removeIf(JwtInformation::isExpired));
 
     origin.entrySet().removeIf(entry -> entry.getValue().isEmpty());
+    log.debug("만료 JWT 정리 완료");
   }
 }
