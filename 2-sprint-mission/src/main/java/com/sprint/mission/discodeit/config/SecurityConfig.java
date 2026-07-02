@@ -6,6 +6,7 @@ import com.sprint.mission.discodeit.security.SpaCsrfTokenRequestHandler;
 import com.sprint.mission.discodeit.security.jwt.JwtTokenProvider;
 import com.sprint.mission.discodeit.security.jwt.filter.JwtAuthenticationFilter;
 import com.sprint.mission.discodeit.security.jwt.handler.JwtLoginSuccessHandler;
+import com.sprint.mission.discodeit.security.jwt.handler.JwtLogoutHandler;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +36,8 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(HttpSecurity http,
       JwtLoginSuccessHandler jwtLoginSuccessHandler,
       LoginFailureHandler loginFailureHandler,
-      JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+      JwtAuthenticationFilter jwtAuthenticationFilter,
+      JwtLogoutHandler jwtLogoutHandler) throws Exception {
     http
         .csrf(csrf -> csrf
             .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
@@ -50,6 +52,7 @@ public class SecurityConfig {
             .logoutUrl("/api/auth/logout")
             .logoutSuccessHandler(
                 new HttpStatusReturningLogoutSuccessHandler(HttpStatus.NO_CONTENT))
+            .addLogoutHandler(jwtLogoutHandler)
         )
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(HttpMethod.GET, "/api/auth/csrf-token").permitAll()
