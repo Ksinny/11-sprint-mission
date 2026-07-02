@@ -68,7 +68,7 @@ public class SecurityConfig {
             .requestMatchers(new NegatedRequestMatcher(
                 PathPatternRequestMatcher.withDefaults().matcher("/api/**")
             )).permitAll()
-            .anyRequest().authenticated()
+            .anyRequest().hasRole("USER")
         )
         .exceptionHandling(exception -> exception
             .authenticationEntryPoint((request, response, authException) ->
