@@ -14,12 +14,14 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@Getter
 public class JwtTokenProvider {
 
   public static final String REFRESH_TOKEN_COOKIE_NAME = "REFRESH_TOKEN";
@@ -76,7 +78,7 @@ public class JwtTokenProvider {
       throw new IllegalStateException("JWT 생성에 실패했습니다.", e);
     }
   }
-  
+
   public boolean validateAccessToken(String token) {
     return validate(token, accessSecretKey, TOKEN_TYPE_ACCESS);
   }
