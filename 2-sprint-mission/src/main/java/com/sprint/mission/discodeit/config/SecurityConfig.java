@@ -46,6 +46,7 @@ public class SecurityConfig {
         .csrf(csrf -> csrf
             .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
             .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler())
+            .ignoringRequestMatchers("/api/auth/logout")
         )
         .formLogin(login -> login
             .loginProcessingUrl("/api/auth/login")
