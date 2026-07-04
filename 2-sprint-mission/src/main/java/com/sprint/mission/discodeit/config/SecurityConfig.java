@@ -1,6 +1,9 @@
 package com.sprint.mission.discodeit.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sprint.mission.discodeit.entity.Role;
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import com.sprint.mission.discodeit.exception.ErrorResponse;
 import com.sprint.mission.discodeit.security.LoginFailureHandler;
 import com.sprint.mission.discodeit.security.SpaCsrfTokenRequestHandler;
 import com.sprint.mission.discodeit.security.jwt.InMemoryJwtRegistry;
@@ -14,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
@@ -35,6 +39,12 @@ import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig {
+
+  private final ObjectMapper objectMapper;
+
+  public SecurityConfig(ObjectMapper objectMapper) {
+    this.objectMapper = objectMapper;
+  }
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http,
@@ -71,10 +81,23 @@ public class SecurityConfig {
             .anyRequest().hasRole("USER")
         )
         .exceptionHandling(exception -> exception
-            .authenticationEntryPoint((request, response, authException) ->
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED))
-            .accessDeniedHandler((request, response, accessDeniedException) ->
-                response.setStatus(HttpServletResponse.SC_FORBIDDEN))
+            .authenticationEntryPoint((request, response, authException) -> {
+              response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+              response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+              response.setCharacterEncoding("UTF-8");
+
+              ErrorResponse error = new ErrorResponse(ErrorCode.UNAUTHORIZED_ACCESS, authException);
+              response.getWriter().write(objectMapper.writeValueAsString(error));
+            })
+            .accessDeniedHandler((request, response, accessDeniedException) -> {
+              response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+              response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+              response.setCharacterEncoding("UTF-8");
+
+              ErrorResponse error = new ErrorResponse(ErrorCode.ACCESS_DENIED,
+                  accessDeniedException);
+              response.getWriter().write(objectMapper.writeValueAsString(error));
+            })
         )
         .sessionManagement(session -> session
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
