@@ -138,6 +138,7 @@ public class BasicUserService implements UserService {
 
       // 비밀번호 수정
       Optional.ofNullable(request.newPassword())
+          .map(passwordEncoder::encode)
           .ifPresent(user::changePassword);
 
       log.info("사용자 업데이트 완료: userId={}", id);
