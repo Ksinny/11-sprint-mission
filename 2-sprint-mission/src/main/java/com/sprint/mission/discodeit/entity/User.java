@@ -74,9 +74,4 @@ public class User extends BaseUpdatableEntity {
   public void updateRole(Role newRole) {
     this.role = newRole;
   }
-
-  // 비밀번호 일치 검증
-  public boolean matchesPassword(String password) {
-    return this.password != null && this.password.equals(password);
-  }
 }
