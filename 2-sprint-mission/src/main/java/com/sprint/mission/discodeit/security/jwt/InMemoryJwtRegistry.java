@@ -24,13 +24,15 @@ public class InMemoryJwtRegistry implements JwtRegistry {
   public void registerJwtInformation(JwtInformation jwtInformation) {
     UUID userId = jwtInformation.getUserDto().id();
 
-    Queue<JwtInformation> queue = origin.computeIfAbsent(userId,
-        key -> new ConcurrentLinkedQueue<>());
-    queue.offer(jwtInformation);
+    origin.compute(userId, (key, queue) -> {
+      Queue<JwtInformation> targetQueue = (queue == null) ? new ConcurrentLinkedQueue<>() : queue;
+      targetQueue.offer(jwtInformation);
 
-    while (queue.size() > maxActiveJwtCount) {
-      queue.poll();
-    }
+      while (targetQueue.size() > maxActiveJwtCount) {
+        targetQueue.poll();
+      }
+      return targetQueue;
+    });
   }
 
   @Override
@@ -70,10 +72,12 @@ public class InMemoryJwtRegistry implements JwtRegistry {
   @Scheduled(fixedDelayString = "${discodeit.jwt.cleanup-interval}")
   @Override
   public void clearExpiredJwtInformation() {
-    origin.values().forEach(queue ->
-        queue.removeIf(JwtInformation::isExpired));
-
-    origin.entrySet().removeIf(entry -> entry.getValue().isEmpty());
+    origin.keySet().forEach(userId ->
+        origin.computeIfPresent(userId, (key, queue) -> {
+          queue.removeIf(JwtInformation::isExpired);
+          return queue.isEmpty() ? null : queue;
+        })
+    );
     log.debug("만료 JWT 정리 완료");
   }
 }
