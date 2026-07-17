@@ -34,7 +34,7 @@ info:
   java:
     version: 17
   spring-boot:
-    version: 3.4.0
+    version: 3.5.11
   config:
     datasource:
       url: ${SPRING_DATASOURCE_URL}
