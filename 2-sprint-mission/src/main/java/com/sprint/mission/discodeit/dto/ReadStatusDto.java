@@ -32,7 +32,8 @@ public class ReadStatusDto {
   }
 
   public record UpdateRequest(
-      Instant newLastReadAt
+      Instant newLastReadAt,
+      Boolean newNotificationEnabled
   ) {
 
   }

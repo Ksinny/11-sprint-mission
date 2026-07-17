@@ -48,11 +48,15 @@ public class ReadStatus extends BaseUpdatableEntity {
     this.notificationEnabled = notificationEnabled;
   }
 
-
   // updatedAt을 현재 시간으로 갱신
   public void update(Instant newLastReadAt) {
     if (newLastReadAt != null && !newLastReadAt.equals(this.lastReadAt)) {
       this.lastReadAt = newLastReadAt;
     }
+  }
+
+  // 채널 알림 여부 변경
+  public void updateNotificationEnabled(boolean notificationEnabled) {
+    this.notificationEnabled = notificationEnabled;
   }
 }
