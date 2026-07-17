@@ -6,11 +6,11 @@ import com.sprint.mission.discodeit.dto.JwtInformation;
 import com.sprint.mission.discodeit.security.DiscodeitUserDetails;
 import com.sprint.mission.discodeit.security.jwt.JwtRegistry;
 import com.sprint.mission.discodeit.security.jwt.JwtTokenProvider;
+import com.sprint.mission.discodeit.security.jwt.RefreshTokenCookieFactory;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.Duration;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +29,7 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
   private final JwtTokenProvider jwtTokenProvider;
   private final ObjectMapper objectMapper;
   private final JwtRegistry jwtRegistry;
+  private final RefreshTokenCookieFactory refreshTokenCookieFactory;
 
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -47,14 +48,7 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
     jwtRegistry.registerJwtInformation(
         new JwtInformation(userDetails.getUserDto(), accessToken, refreshToken, expiration));
 
-    ResponseCookie refreshCookie = ResponseCookie
-        .from(JwtTokenProvider.REFRESH_TOKEN_COOKIE_NAME, refreshToken)
-        .httpOnly(true)
-        .secure(false)
-        .path("/")
-        .maxAge(Duration.ofMillis(jwtTokenProvider.getRefreshTokenExpirationMs()))
-        .sameSite("Lax")
-        .build();
+    ResponseCookie refreshCookie = refreshTokenCookieFactory.create(refreshToken);
     response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
     response.setStatus(HttpServletResponse.SC_OK);

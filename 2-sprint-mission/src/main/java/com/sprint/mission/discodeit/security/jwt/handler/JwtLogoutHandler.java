@@ -2,9 +2,9 @@ package com.sprint.mission.discodeit.security.jwt.handler;
 
 import com.sprint.mission.discodeit.security.jwt.JwtRegistry;
 import com.sprint.mission.discodeit.security.jwt.JwtTokenProvider;
+import com.sprint.mission.discodeit.security.jwt.RefreshTokenCookieFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +22,7 @@ public class JwtLogoutHandler implements LogoutHandler {
 
   private final JwtTokenProvider jwtTokenProvider;
   private final JwtRegistry jwtRegistry;
+  private final RefreshTokenCookieFactory refreshTokenCookieFactory;
 
   @Override
   public void logout(HttpServletRequest request, HttpServletResponse response,
@@ -41,15 +42,8 @@ public class JwtLogoutHandler implements LogoutHandler {
             UUID userId = jwtTokenProvider.getUserId(refreshToken);
             jwtRegistry.invalidateJwtInformationByUserId(userId);
           }
-          
-          ResponseCookie expiredCookie = ResponseCookie
-              .from(JwtTokenProvider.REFRESH_TOKEN_COOKIE_NAME, "")
-              .httpOnly(true)
-              .secure(false)
-              .path("/")
-              .maxAge(Duration.ZERO)
-              .sameSite("Lax")
-              .build();
+
+          ResponseCookie expiredCookie = refreshTokenCookieFactory.expired();
           response.addHeader(HttpHeaders.SET_COOKIE, expiredCookie.toString());
 
           log.info("로그아웃: REFRESH_TOKEN 쿠키 삭제");
