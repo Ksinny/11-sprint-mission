@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.dto.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.BinaryContentDto.Response;
 import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.entity.BinaryContentStatus;
 import com.sprint.mission.discodeit.event.BinaryContentCreatedEvent;
 import com.sprint.mission.discodeit.exception.binarycontent.BinaryContentNotFoundException;
 import com.sprint.mission.discodeit.mapper.BinaryContentMapper;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
@@ -64,6 +66,16 @@ public class BasicBinaryContentService implements BinaryContentService {
 
     log.info("바이너리 컨텐츠 다건 조회 완료: 총 {}건", responses.size());
     return responses;
+  }
+
+  @Override
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void updateStatus(UUID id, BinaryContentStatus status) {
+    BinaryContent binaryContent = binaryContentRepository.findById(id)
+        .orElseThrow(() -> BinaryContentNotFoundException.withId(id));
+
+    binaryContent.updateStatus(status);
+    log.debug("바이너리 컨텐츠 상태 변경: binaryContentId={}, status={}", id, status);
   }
 
   @Override
