@@ -26,6 +26,7 @@ public class ReadStatusDto {
           .user(user)
           .channel(channel)
           .lastReadAt(this.lastReadAt)
+          .notificationEnabled(false)
           .build();
     }
   }
@@ -41,7 +42,8 @@ public class ReadStatusDto {
       UUID id,
       UUID userId,
       UUID channelId,
-      Instant lastReadAt
+      Instant lastReadAt,
+      boolean notificationEnabled
   ) {
 
   }

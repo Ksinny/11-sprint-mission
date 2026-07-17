@@ -72,6 +72,7 @@ public class BasicChannelService implements ChannelService {
               .user(user)
               .channel(channel)
               .lastReadAt(channel.getCreatedAt())
+              .notificationEnabled(true)
               .build())
           .toList();
 
