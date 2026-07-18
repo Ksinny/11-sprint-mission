@@ -1,11 +1,14 @@
 package com.sprint.mission.discodeit.event;
 
 import com.sprint.mission.discodeit.entity.Notification;
+import com.sprint.mission.discodeit.entity.Role;
 import com.sprint.mission.discodeit.repository.NotificationRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
+import com.sprint.mission.discodeit.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -19,6 +22,7 @@ public class NotificationRequiredEventListener {
 
   private final ReadStatusRepository readStatusRepository;
   private final NotificationRepository notificationRepository;
+  private final UserRepository userRepository;
 
   @Async("eventTaskExecutor")
   @TransactionalEventListener
@@ -59,5 +63,29 @@ public class NotificationRequiredEventListener {
         .build());
 
     log.info("권한 변경 알림 생성 완료: userId={}", event.userId());
+  }
+
+  @Async("eventTaskExecutor")
+  @EventListener
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void on(S3UploadFailedEvent event) {
+    log.debug("S3 업로드 실패 알림 생성 시작: binaryContentId={}", event.binaryContentId());
+
+    List<Notification> notifications = userRepository.findAllByRole(Role.ADMIN).stream()
+        .map(admin -> Notification.builder()
+            .receiverId(admin.getId())
+            .title("S3 업로드 실패")
+            .content(String.format("RequestId: %s%nBinaryContentId: %s%nError: %s",
+                event.requestId(), event.binaryContentId(), event.errorMessage()))
+            .build())
+        .toList();
+
+    if (notifications.isEmpty()) {
+      log.warn("관리자 계정이 없어 실패 알림을 생성하지 못했습니다.");
+      return;
+    }
+
+    notificationRepository.saveAll(notifications);
+    log.info("S3 업로드 실패 알림 생성 완료: {}건", notifications.size());
   }
 }
