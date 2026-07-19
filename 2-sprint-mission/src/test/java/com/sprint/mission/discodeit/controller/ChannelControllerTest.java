@@ -14,12 +14,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.navercorp.fixturemonkey.FixtureMonkey;
 import com.sprint.mission.discodeit.dto.ChannelDto;
 import com.sprint.mission.discodeit.dto.UserDto;
 import com.sprint.mission.discodeit.entity.ChannelType;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.channel.PrivateChannelUpdateException;
 import com.sprint.mission.discodeit.service.ChannelService;
+import com.sprint.mission.discodeit.support.FixtureMonkeyFactory;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -261,25 +263,18 @@ class ChannelControllerTest {
     UUID channelId1 = UUID.randomUUID();
     UUID channelId2 = UUID.randomUUID();
 
+    FixtureMonkey fixture = FixtureMonkeyFactory.get();
+
     List<ChannelDto.Response> channels = List.of(
-        ChannelDto.Response.builder()
-            .id(channelId1)
-            .type(ChannelType.PUBLIC)
-            .name("public-channel")
-            .description("공개 채널 설명")
-            .participants(new ArrayList<>())
-            .lastMessageAt(Instant.now())
-            .build(),
-        ChannelDto.Response.builder()
-            .id(channelId2)
-            .type(ChannelType.PRIVATE)
-            .name(null)
-            .description(null)
-            .participants(List.of(
-                UserDto.Response.builder().id(userId).username("user1").email("user1@example.com")
-                    .online(true).build()))
-            .lastMessageAt(Instant.now().minusSeconds(3600))
-            .build()
+        fixture.giveMeBuilder(ChannelDto.Response.class)
+            .set("id", channelId1)
+            .set("type", ChannelType.PUBLIC)
+            .set("name", "public-channel")
+            .sample(),
+        fixture.giveMeBuilder(ChannelDto.Response.class)
+            .set("id", channelId2)
+            .set("type", ChannelType.PRIVATE)
+            .sample()
     );
 
     given(channelService.findAllByUserId(userId)).willReturn(channels);
