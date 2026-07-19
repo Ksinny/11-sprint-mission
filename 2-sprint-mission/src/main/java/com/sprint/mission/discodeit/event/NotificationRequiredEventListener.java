@@ -8,6 +8,8 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -23,6 +25,7 @@ public class NotificationRequiredEventListener {
   private final ReadStatusRepository readStatusRepository;
   private final NotificationRepository notificationRepository;
   private final UserRepository userRepository;
+  private final CacheManager cacheManager;
 
   @Async("eventTaskExecutor")
   @TransactionalEventListener
@@ -47,6 +50,7 @@ public class NotificationRequiredEventListener {
     }
 
     notificationRepository.saveAll(notifications);
+    evictNotificationCache(notifications);
     log.info("메시지 알림 생성 완료: channelId={}, 총 {}건", event.channelId(), notifications.size());
   }
 
@@ -56,12 +60,13 @@ public class NotificationRequiredEventListener {
   public void on(RoleUpdatedEvent event) {
     log.debug("권한 변경 알림 생성 시작: userId={}", event.userId());
 
-    notificationRepository.save(Notification.builder()
+    Notification notification = notificationRepository.save(Notification.builder()
         .receiverId(event.userId())
         .title("권한이 변경되었습니다.")
         .content(event.oldRole() + " -> " + event.newRole())
         .build());
 
+    evictNotificationCache(List.of(notification));
     log.info("권한 변경 알림 생성 완료: userId={}", event.userId());
   }
 
@@ -86,6 +91,19 @@ public class NotificationRequiredEventListener {
     }
 
     notificationRepository.saveAll(notifications);
+    evictNotificationCache(notifications);
     log.info("S3 업로드 실패 알림 생성 완료: {}건", notifications.size());
+  }
+
+  // 수신자들의 알림 캐시 무효화
+  private void evictNotificationCache(List<Notification> notifications) {
+    Cache cache = cacheManager.getCache("notifications");
+    if (cache == null) {
+      return;
+    }
+    notifications.stream()
+        .map(Notification::getReceiverId)
+        .distinct()
+        .forEach(cache::evict);
   }
 }

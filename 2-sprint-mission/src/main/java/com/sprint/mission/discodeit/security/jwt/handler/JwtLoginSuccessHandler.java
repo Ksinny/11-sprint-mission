@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
@@ -30,6 +32,7 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
   private final ObjectMapper objectMapper;
   private final JwtRegistry jwtRegistry;
   private final RefreshTokenCookieFactory refreshTokenCookieFactory;
+  private final CacheManager cacheManager;
 
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -44,9 +47,10 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
     String accessToken = jwtTokenProvider.generateAccessToken(userDetails);
     String refreshToken = jwtTokenProvider.generateRefreshToken(userDetails);
 
-    Instant expiration = jwtTokenProvider.getExpiration(refreshToken);   // 리프레시 기준 만료 시각
+    Instant expiration = jwtTokenProvider.getExpiration(refreshToken);
     jwtRegistry.registerJwtInformation(
         new JwtInformation(userDetails.getUserDto(), accessToken, refreshToken, expiration));
+    evictUsersCache();
 
     ResponseCookie refreshCookie = refreshTokenCookieFactory.create(refreshToken);
     response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
@@ -59,5 +63,12 @@ public class JwtLoginSuccessHandler implements AuthenticationSuccessHandler {
     response.getWriter().write(objectMapper.writeValueAsString(jwtDto));
 
     log.info("로그인 성공, 토큰 발급: username={}", userDetails.getUsername());
+  }
+
+  private void evictUsersCache() {
+    Cache cache = cacheManager.getCache("users");
+    if (cache != null) {
+      cache.clear();
+    }
   }
 }

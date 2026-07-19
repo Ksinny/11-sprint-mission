@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,6 +39,7 @@ public class BasicUserService implements UserService {
 
   @Override
   @Transactional
+  @CacheEvict(cacheNames = "users", allEntries = true)
   public UserDto.Response create(UserDto.CreateRequest request,
       BinaryContentDto.CreateRequest profileImageRequest) {
     log.debug("사용자 생성 시작: username={}, email={}", request.username(), request.email());
@@ -94,6 +96,7 @@ public class BasicUserService implements UserService {
   @Override
   @Transactional
   @PreAuthorize("hasRole('ADMIN') or #id == principal.userDto.id")
+  @CacheEvict(cacheNames = "users", allEntries = true)
   public UserDto.Response update(UUID id, UserDto.UpdateRequest request,
       BinaryContentDto.CreateRequest profileImageRequest) {
     log.debug("사용자 업데이트 시작: id={}", id);
@@ -143,6 +146,7 @@ public class BasicUserService implements UserService {
   @Override
   @Transactional
   @PreAuthorize("hasRole('ADMIN') or #id == principal.userDto.id")
+  @CacheEvict(cacheNames = "users", allEntries = true)
   public void delete(UUID id) {
     log.debug("사용자 삭제 시작: id={}", id);
 
