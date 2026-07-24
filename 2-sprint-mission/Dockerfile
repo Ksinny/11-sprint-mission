@@ -27,14 +27,14 @@ WORKDIR /app
 
 # 환경 변수 설정
 ENV PROJECT_NAME=discodeit \
-    PROJECT_VERSION=1.2-M8 \
+    PROJECT_VERSION=3.0-M12 \
     JVM_OPTS=""
 
 # 빌드 스테이지에서 JAR 파일 복사
 COPY --from=builder /app/build/libs/${PROJECT_NAME}-${PROJECT_VERSION}.jar ./
 
 # 포트 노출
-EXPOSE 80
+EXPOSE 8080
 
 # JAR 실행
 ENTRYPOINT ["sh", "-c", "java ${JVM_OPTS} -jar ${PROJECT_NAME}-${PROJECT_VERSION}.jar"]
