@@ -2,7 +2,7 @@ spring:
   application:
     name: discodeit
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
@@ -22,12 +22,13 @@ spring:
         maximumSize=100,
         expireAfterAccess=600s,
         recordStats
-    redis: # ← 추가
+    redis:
       enable-statistics: true
-    data: # ← 추가
-      redis:
-        host: ${REDIS_HOST:localhost}
-        port: ${REDIS_PORT:6379}
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
   servlet:
     multipart:
