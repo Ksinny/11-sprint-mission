@@ -83,7 +83,7 @@ public class SseRequiredEventListener {
     log.debug("SSE 사용자 생성 전송: userId={}", event.user().id());
   }
 
-  @TransactionalEventListener
+  @TransactionalEventListener(fallbackExecution = true)
   public void on(UserUpdatedEvent event) {
     sseService.broadcast("users.updated", event.user());
     log.debug("SSE 사용자 수정 전송: userId={}", event.user().id());
