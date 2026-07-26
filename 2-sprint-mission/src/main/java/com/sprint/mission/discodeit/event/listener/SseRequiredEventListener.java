@@ -10,6 +10,9 @@ import com.sprint.mission.discodeit.event.ChannelCreatedEvent;
 import com.sprint.mission.discodeit.event.ChannelDeletedEvent;
 import com.sprint.mission.discodeit.event.ChannelUpdatedEvent;
 import com.sprint.mission.discodeit.event.NotificationCreatedEvent;
+import com.sprint.mission.discodeit.event.UserCreatedEvent;
+import com.sprint.mission.discodeit.event.UserDeletedEvent;
+import com.sprint.mission.discodeit.event.UserUpdatedEvent;
 import com.sprint.mission.discodeit.service.SseService;
 import java.util.Set;
 import java.util.UUID;
@@ -72,5 +75,23 @@ public class SseRequiredEventListener {
     sseService.send(receiverIds, eventName, channel);
     log.debug("SSE 채널 이벤트 참여자 전송: eventName={}, channelId={}, 수신자={}명",
         eventName, channel.id(), receiverIds.size());
+  }
+
+  @TransactionalEventListener
+  public void on(UserCreatedEvent event) {
+    sseService.broadcast("users.created", event.user());
+    log.debug("SSE 사용자 생성 전송: userId={}", event.user().id());
+  }
+
+  @TransactionalEventListener
+  public void on(UserUpdatedEvent event) {
+    sseService.broadcast("users.updated", event.user());
+    log.debug("SSE 사용자 수정 전송: userId={}", event.user().id());
+  }
+
+  @TransactionalEventListener
+  public void on(UserDeletedEvent event) {
+    sseService.broadcast("users.deleted", event.user());
+    log.debug("SSE 사용자 삭제 전송: userId={}", event.user().id());
   }
 }
