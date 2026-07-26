@@ -102,6 +102,7 @@ discodeit:
     email: ${DISCODEIT_ADMIN_EMAIL}
     password: ${DISCODEIT_ADMIN_PASSWORD}
   jwt:
+    registry: ${JWT_REGISTRY:memory} # memory | redis
     cleanup-interval: 300000 # (기본값: 5분)
     max-active-sessions: 1
     access-token:
